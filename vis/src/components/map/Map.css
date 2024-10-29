@@ -1,4 +1,4 @@
-#map-container {
+.map-container {
     position: absolute;
     background-color: aqua;
     top: 0;
