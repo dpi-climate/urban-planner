@@ -1,57 +1,100 @@
-import React, { useEffect, useState, useCallback } from "react"
-import { FeatureCollection, Geometry } from 'geojson'
-import { MapboxOverlay } from '@deck.gl/mapbox'
+import React, { useEffect } from 'react';
+import { Feature, FeatureCollection, Geometry, MultiPolygon } from 'geojson'
+import * as d3 from 'd3-contour';
+import { scaleLinear } from 'd3-scale';
+import mapboxgl from 'mapbox-gl';
 
-import myConsts from "../../consts/consts"
 
-import { ContourLayer } from '@deck.gl/aggregation-layers'
-
-interface IMapLayers {
-  map: mapboxgl.Map | null
-  geoFile: string | null
-}
-
-const MapLayers: React.FC<IMapLayers> = (props) => {
-
-  const [geojsonData, setGeojsonData] = useState<FeatureCollection<Geometry> | null>(null)
-
+const MapWithContours = ({ map }: {map: mapboxgl.Map | null}) => {
   useEffect(() => {
-    if(!props.geoFile) return 
-    
-    fetch(props.geoFile)
-      .then(response => response.json())
-      .then(data => setGeojsonData(data))
-      .catch(error => console.error('Error fetching data:', error))
+    if (!map) return;
 
-  }, [props.geoFile])
+    // const rows = 160;
+    // const columns = 220;
+    const rows = 100;
+    const columns = 200;
+    const temperatureGrid = Array.from({ length: rows }, () =>
+      Array.from({ length: columns }, () => Math.round(Math.random() * 15) + 15) // Values from 15 to 30
+    );
 
-  const populateMap = useCallback(() => {
+    const lonRange = [-98.0, -95.0];
+    const latRange = [38.0, 40.0];
 
-    if (!props.map || !geojsonData) return
+    // Wait for the map's style to load before adding the contours
+    map.on('style.load', () => {
+      // Define scales to map grid coordinates to longitude and latitude
+      const xScale = scaleLinear()
+        .domain([0, temperatureGrid[0].length - 1])  // Grid width
+        .range(lonRange);                            // Longitude range
 
-    // Create the Deck.gl ContourLayer
-    const deckOverlay = new MapboxOverlay({
-      interleaved: true,
-      layers: [
-        new ContourLayer({
-          id: myConsts.contourLayerParams.id,
-          data: geojsonData.features,
-          getPosition: d => d.geometry.coordinates,
-          getWeight: d => d.properties.temperature,
-          contours: myConsts.contourLayerParams.contours,
-          aggregation: myConsts.contourLayerParams.aggregation,
-          cellSize: myConsts.contourLayerParams.cellSize, // Adjust based on data density
-        }),
-      ],
-    })
+      const yScale = scaleLinear()
+        .domain([0, temperatureGrid.length - 1])     // Grid height
+        .range(latRange);                            // Latitude range
 
-    props.map.addControl(deckOverlay)
+      // Generate contour paths using d3.contours
+      const contours = d3.contours()
+        .size([temperatureGrid[0].length, temperatureGrid.length])  // Grid dimensions
+        .thresholds([15, 18, 21, 24, 27, 30])                       // Define thresholds
+        (temperatureGrid.flat());                                   // Flatten 2D array to 1D
 
-  },[geojsonData])
+      // Convert contours to GeoJSON format
+      const contourFeatures: Feature<MultiPolygon, { value: number }>[] = contours.map(contour => ({
+        type: "Feature",
+        properties: { value: contour.value },
+        geometry: {
+          type: "MultiPolygon",
+          coordinates: contour.coordinates.map(polygon =>
+            polygon.map(ring =>
+              ring.map(([x, y]) => [xScale(x), yScale(y)])   // Convert grid to lon/lat
+            )
+          )
+        }
+      }));
+      
+      const geojson: FeatureCollection<MultiPolygon, { value: number }> = {
+        type: "FeatureCollection",
+        features: contourFeatures
+      };
+      
+      // Add GeoJSON as a source in Mapbox
+      if (!map.getSource('contours')) {
+        map.addSource('contours', {
+          type: 'geojson',
+          data: geojson
+        });
+      }
 
-  useEffect(() => populateMap(), [populateMap])
+      // Add a layer to style the contours
+      if (!map.getLayer('contours')) {
+        map.addLayer({
+          id: 'contours',
+          type: 'fill',
+          source: 'contours',
+          paint: {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'value'],
+              15, '#ffffb2',
+              18, '#fecb5c',
+              21, '#fd8d3c',
+              24, '#f03b20',
+              27, '#bd0026'
+            ],
+            'fill-opacity': 0.6
+          }
+        });
+      }
+    });
 
-  return null // This component doesn't render anything in the DOM
-}
+    // Cleanup on component unmount
+    return () => {
+      if (map.getLayer('contours')) map.removeLayer('contours');
+      if (map.getSource('contours')) map.removeSource('contours');
+    };
+  }, [map]);
 
-export default MapLayers
+  return null;
+};
+
+export default MapWithContours;

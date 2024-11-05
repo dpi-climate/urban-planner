@@ -1,3 +1,5 @@
+/server/
+
 /vis/node_modules
 /vis/dist
 /vis/.env

@@ -3,6 +3,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import MapLayers from "./MapLayers"
+import MapClickHandler from "./MapClickHandler"
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN as string
 
@@ -41,7 +42,13 @@ const Map: React.FC<IMap> = (props) => {
 
   return (
     <div className="map-container" ref={mapContainerRef}>
-      { map && <MapLayers map={map} geoFile={props.geoFile}/> }
+      { map && 
+        <>
+          <MapLayers map={map} geoFile={props.geoFile}/>
+          {/* <MapClickHandler map={map} /> */}
+        </>      
+      }
+
     </div>
   ) 
 
