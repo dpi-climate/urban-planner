@@ -4,11 +4,18 @@ import Button from '@mui/material/Button'
 import SwipeableDrawer from '@mui/material/SwipeableDrawer'
 import Box from '@mui/material/Box'
 
+import InfoIcon from '@mui/icons-material/Info'
 import HomeIcon from '@mui/icons-material/Home'
 import SettingsIcon from '@mui/icons-material/Settings'
-import InfoIcon from '@mui/icons-material/Info'
+import LayersIcon from '@mui/icons-material/Layers'
+import EvStationIcon from '@mui/icons-material/EvStation'
+
+
+import Tooltip from '@mui/material/Tooltip'
 
 import { DrawerWrapperProps } from '../../types-and-interfaces/interfaces'
+
+import DrawerContent from './DrawerContent'
 
 // Buttons Component
 const Buttons: React.FC<{
@@ -22,6 +29,12 @@ const Buttons: React.FC<{
         let icon
 
         switch (label) {
+          case "Layers":
+            icon = <LayersIcon/>
+            break
+          case "EV-Stations":
+            icon = <EvStationIcon/>
+            break
           case 'Home':
             icon = <HomeIcon />
             break
@@ -36,21 +49,23 @@ const Buttons: React.FC<{
         }
 
         return (
-          <Button
-            key={index}
-            onClick={onButtonClick}
-            sx={{
-              margin: 1,
-              width: 40,
-              height: 40,
-              minWidth: 40,
-              minHeight: 40,
-              boxShadow: 3,
-              backgroundColor: 'white',
-            }}
-          >
-            {icon}
-          </Button>
+          <Tooltip key={index} title={label} arrow>
+            <Button
+              key={index}
+              onClick={onButtonClick}
+              sx={{
+                margin: 1,
+                width: 40,
+                height: 40,
+                minWidth: 40,
+                minHeight: 40,
+                boxShadow: 3,
+                backgroundColor: 'white',
+              }}
+            >
+              {icon}
+            </Button>
+          </Tooltip>
         )
       })}
     </Box>
@@ -167,7 +182,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = ({ anchor, buttons }) => {
             exit: leavingScreen,
           }}
         >
-          {/* Empty Box to hold drawer structure */}
+          <DrawerContent/>
           <Box
             sx={{
               width: anchor === 'left' || anchor === 'right' ? size[anchor] : 'auto',

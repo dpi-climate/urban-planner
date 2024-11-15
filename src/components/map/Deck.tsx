@@ -1,5 +1,3 @@
-// Map.tsx
-
 import "./Map.css"
 import React, { useRef, useState, useCallback, useEffect } from "react"
 import mapboxgl from "mapbox-gl"
@@ -65,7 +63,8 @@ const Map: React.FC<IMap> = (props) => {
       <div className="map-container" ref={mapContainerRef}>
         {map && (
           <>
-            <MapLayers map={map} geoFile={props.geoFile} />
+            {/* <MapLayers map={map} geoFile={props.geoFile} /> */}
+            <MapLayers map={map} />
             <MapClickHandler map={map} isAdding={isAddingIcon} isRemoving={isRemovingIcon} />
           </>
         )}

@@ -51,8 +51,6 @@ const Map: React.FC<IMap> = (props) => {
 
     </div>
   ) 
-
-
 }
 
 export default Map
