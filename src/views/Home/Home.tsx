@@ -6,20 +6,11 @@ import myConsts from "../../consts/consts"
 import MapDec from "../../components/map/Deck"
 
 import ElementWrapper from "../../components/element-wrapper/ElementWrapper"
-
-
 import DrawerWrapper from "../../components/drawer/DrawerWrapper"
 
 const Home = () => {
 
   const renderMenu = () => {
-    // const buttons = [
-    //   { label: 'Home', icon: <HomeIcon /> },
-    //   { label: 'Settings', icon: <SettingsIcon /> },
-    //   { label: 'Info', icon: <InfoIcon /> },
-    // ]
-    // const buttons = ["Layers", 'Home', 'Settings', 'Info']
-    // const buttons = ["Layers", "EV-Stations"]
     const buttons = ["Layers"]
 
     return <DrawerWrapper anchor={"right"} buttons={buttons}/>
