@@ -1,5 +1,5 @@
 /server/
-/public/Yearly_ncfiles
+/public/
 /node_modules
 /dist
 /.env
