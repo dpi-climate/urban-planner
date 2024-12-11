@@ -4,11 +4,11 @@ const ElementWrapper = (props: any) => {
   return (
     <div style={{
       position: 'relative',
-      right: '-100px',
+      right: props.right,
       display: 'flex',
       flexDirection: 'column',
-      width: '1000px',
-      height: '500px',
+      width: props.width,
+      height: props.height,
       backgroundColor: 'purple',
       margin: '10px',
       padding: '5px'

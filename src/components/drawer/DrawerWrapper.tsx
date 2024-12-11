@@ -1,26 +1,23 @@
 import * as React from 'react'
+
 import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Button from '@mui/material/Button'
 import SwipeableDrawer from '@mui/material/SwipeableDrawer'
 import Box from '@mui/material/Box'
-
 import InfoIcon from '@mui/icons-material/Info'
 import HomeIcon from '@mui/icons-material/Home'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LayersIcon from '@mui/icons-material/Layers'
 import EvStationIcon from '@mui/icons-material/EvStation'
-
-
 import Tooltip from '@mui/material/Tooltip'
 
 import { DrawerWrapperProps } from '../../types-and-interfaces/interfaces'
 
-import DrawerContent from './DrawerContent'
 
 // Buttons Component
 const Buttons: React.FC<{
   buttons: string[],
-  onButtonClick: (event: React.MouseEvent | React.KeyboardEvent) => void,
+  onButtonClick: (label: string, event: React.MouseEvent | React.KeyboardEvent) => void,
   buttonContainerStyle: SxProps<Theme>,
 }> = ({ buttons, onButtonClick, buttonContainerStyle }) => {
   return (
@@ -52,7 +49,7 @@ const Buttons: React.FC<{
           <Tooltip key={index} title={label} arrow>
             <Button
               key={index}
-              onClick={onButtonClick}
+              onClick={(event) => onButtonClick(label, event)}
               sx={{
                 margin: 1,
                 width: 40,
@@ -73,10 +70,11 @@ const Buttons: React.FC<{
 }
 
 // DrawerWrapper Component
-const DrawerWrapper: React.FC<DrawerWrapperProps> = ({ anchor, buttons }) => {
+const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [transitionDuration, setTransitionDuration] = React.useState(0)
   const [transitionEasing, setTransitionEasing] = React.useState('')
+  const [currentButton, setCurrentButton] = React.useState<string | null>(null)
   const theme = useTheme()
 
   const enteringScreen = 800
@@ -85,7 +83,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = ({ anchor, buttons }) => {
   const size = { top: 350, bottom: 350, left: 350, right: 350 }
 
   const toggleDrawer =
-    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    (open: boolean, label?: string) => (event: React.KeyboardEvent | React.MouseEvent) => {
       if (
         event &&
         event.type === 'keydown' &&
@@ -105,7 +103,14 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = ({ anchor, buttons }) => {
       setTransitionDuration(duration)
       setTransitionEasing(easing)
       setIsOpen(open)
+
+      if(open && label) props.setBtn(label)
+
     }
+
+  const handleButtonClick = (label: string, event: React.KeyboardEvent | React.MouseEvent) => {
+    toggleDrawer(true, label)(event)
+  }
 
   const getButtonContainerStyle = (): SxProps<Theme> => {
     const commonStyles: SxProps<Theme> = {
@@ -117,7 +122,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = ({ anchor, buttons }) => {
       transition: `transform ${transitionDuration}ms ${transitionEasing}`,
     }
 
-    switch (anchor) {
+    switch (props.anchor) {
       case 'right':
         return {
           ...commonStyles,
@@ -161,15 +166,18 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = ({ anchor, buttons }) => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <React.Fragment key={`drawer-${anchor}`}>
-        {/* Use the separated Buttons component */}
+      <React.Fragment key={`drawer-${props.anchor}`}>
+
+        {/* Toggles */}
         <Buttons
-          buttons={buttons}
-          onButtonClick={toggleDrawer(true)}
+          buttons={props.buttons}
+          onButtonClick={handleButtonClick}
           buttonContainerStyle={getButtonContainerStyle()}
         />
+
+        {/* Drawer */}
         <SwipeableDrawer
-          anchor={anchor}
+          anchor={props.anchor}
           open={isOpen}
           onClose={toggleDrawer(false)}
           onOpen={toggleDrawer(true)}
@@ -182,14 +190,19 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = ({ anchor, buttons }) => {
             exit: leavingScreen,
           }}
         >
-          <DrawerContent/>
+          {/* Drawer Content */}
+          {props.children}
+          
+          
+          
           <Box
             sx={{
-              width: anchor === 'left' || anchor === 'right' ? size[anchor] : 'auto',
-              height: anchor === 'top' || anchor === 'bottom' ? size[anchor] : 'auto',
+              width: props.anchor === 'left' || props.anchor === 'right' ? size[props.anchor] : 'auto',
+              height: props.anchor === 'top' || props.anchor === 'bottom' ? size[props.anchor] : 'auto',
             }}
           />
         </SwipeableDrawer>
+      
       </React.Fragment>
     </div>
   )

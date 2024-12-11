@@ -3,17 +3,20 @@ const myConsts = {
     {
       id: "map",
       key: "mapParams",
-      width: "1000px",
-      height: "500px"
+
     }
   ],
+
+  years: Array.from({ length: 2023 - 1980 + 1 }, (_, i) => 1980 + i),
   
   mapParams: {
     // style: 'mapbox://styles/mapbox/light-v9',
     style: "mapbox://styles/carolvfs/clxnzay8z02qh01qkhftqheen",
-    center: [-98.20, 38.96] as [number, number],
-    zoom: 3,
-    geoFile: '/temperature.geojson',
+    // center: [-98.20, 38.96] as [number, number],
+    center: [-87.633400, 41.872780] as [number, number],
+    zoom: 12,
+    // geoFile: '/temperature.geojson',
+    geoFile: '/contours/Yearly_tmax_1980.geojson',
 
     layers: [
       {

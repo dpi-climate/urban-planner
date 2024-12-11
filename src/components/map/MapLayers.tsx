@@ -7,34 +7,6 @@ import { scaleLinear } from 'd3-scale'
 const lonRange = [-98.0, -95.0]
 const latRange = [38.0, 40.0]
 
-const rows = 160
-const columns = 220
-
-const data = Array.from({ length: rows }, () =>
-  Array.from({ length: columns }, () => Math.round(Math.random() * 15) + 15) // Values from 15 to 30
-)
-
-const ContourLayer = ({ map }: {map: mapboxgl.Map | null}) => {
-
-  const buildLayer = useCallback(() => {
-
-    if (!map) return
-
-    map.on("style.load", () => {
-
-      const xScale = scaleLinear()
-        .domain([0, data[0].length - 1])
-        .range(lonRange)
-
-    })
-
-  },[map])
-
-
-
-}
-
-
 const MapWithContours = ({ map }: {map: mapboxgl.Map | null}) => {
   useEffect(() => {
     if (!map) return
@@ -46,7 +18,7 @@ const MapWithContours = ({ map }: {map: mapboxgl.Map | null}) => {
     const temperatureGrid = Array.from({ length: rows }, () =>
       Array.from({ length: columns }, () => Math.round(Math.random() * 15) + 15) // Values from 15 to 30
     )
-
+    console.log(temperatureGrid)
     const lonRange = [-98.0, -95.0]
     const latRange = [38.0, 40.0]
 
