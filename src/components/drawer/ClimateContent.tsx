@@ -12,39 +12,49 @@ import UploadIcon from '@mui/icons-material/Upload'
 import Stack from '@mui/material/Stack'
 
 import { DrawerWrapperContentProps } from '../../types-and-interfaces/interfaces'
-import myConsts from '../../consts/consts'
 
 const title = "Climate"
 const subtitle = ""
 
 const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
-  const [firstDropdown, setFirstDropdown] = useState<string>('')
-  const [secondDropdown, setSecondDropdown] = useState<string>('')
-  const [thirdDropdown, setThirdDropdown] = useState<string>('')
 
-  const handleFirstDropdownChange = (event: SelectChangeEvent) => {
-    setFirstDropdown(event.target.value)
+  const renderFileDropdown = () => {
+    return (
+      <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
+        <InputLabel>Source</InputLabel>
+        <Select
+          value={`${props.griddedLayerIdx}`}
+          label={props.sources[props.griddedLayerIdx].name}
+          onChange={(event: SelectChangeEvent) => props.updateSource(parseInt(event.target.value))}
+        >
+          {
+            props.sources.map((obj: {name: string, id: string, properties: string[]}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
+          }
+        </Select>
+      </FormControl>
+    )
   }
 
-  const handleSecondDropdownChange = (event: SelectChangeEvent) => {
-    setSecondDropdown(event.target.value)
-  }
-
-  const handleThirdDropdownChange = (event: SelectChangeEvent) => {
-    setThirdDropdown(event.target.value)
-  }
-
-  const handleLoadBtnClick = () => {
-    if(firstDropdown && secondDropdown) {
-      const layerStr = `Yearly_${secondDropdown}_Sum.json`
-      if(props.climateVariable !== secondDropdown) {
-        props.setClimateVariable(layerStr)
-      }
-
-      if(props.year != firstDropdown) {
-        props.setYear(firstDropdown)
-      }
-
+  const renderProperties = () => {
+    console.log(props.sources, props.griddedLayerIdx, props.activePropIdx, props.sources && props.griddedLayerIdx && props.activePropIdx)
+    if(props.sources && props.activePropIdx !== null) {
+      return (
+        <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
+          <InputLabel>Colors</InputLabel>
+          <Select
+            value={props.activePropIdx.toString()}
+            label={props.sources[props.griddedLayerIdx].properties[props.activePropIdx]}
+            onChange={(event: SelectChangeEvent) => props.updateProp(parseInt(event.target.value))}
+          >
+            {
+              props.sources[props.griddedLayerIdx].properties.map((p: string, i: number) => <MenuItem key={`dropdown_prop_key_${p}`} value={i}>{p}</MenuItem>)
+            }
+          </Select>
+        </FormControl>
+      )
+      
+    } else {
+      return null
     }
   }
 
@@ -55,63 +65,9 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
         {subtitle}
       </Typography>
 
-      {/* First Dropdown */}
-      <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-        <InputLabel>Variable</InputLabel>
-        <Select
-          value={secondDropdown}
-          label="Variable"
-          onChange={handleSecondDropdownChange}
-        >
-          <MenuItem value="precipitation">Precipitation</MenuItem>
-          <MenuItem value="temperature">Temperature</MenuItem>
-        </Select>
-      </FormControl>
+      {renderFileDropdown()}
+      {renderProperties()}
       
-      {/* Second Dropdown */}
-      <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-        <InputLabel>Year</InputLabel>
-        <Select
-          value={firstDropdown}
-          label="Year"
-          onChange={handleFirstDropdownChange}
-        >
-          {
-            myConsts.years.map((y: number) => <MenuItem key={`year_key_${y}`} value={y}>{y}</MenuItem>)
-          }
-        </Select>
-      </FormControl>
-
-
-      {/* Third Dropdown */}
-      <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-        <InputLabel>Spatial Units</InputLabel>
-        <Select
-          value={thirdDropdown}
-          label="Spatial Units"
-          onChange={handleThirdDropdownChange}
-        >
-          <MenuItem value="points">Points</MenuItem>
-          <MenuItem value="blocks">Blocks</MenuItem>
-          <MenuItem value="census_tracts">Census Tracts</MenuItem>
-          <MenuItem value="cities">Cities</MenuItem>
-        </Select>
-      </FormControl>
-
-      {/* Update Button */}
-      {/* <Stack direction="row" spacing={2} sx={{ margin: 1, maxWidth: 200 }}> */}
-      <Stack direction="row" sx={{ margin: 1, maxWidth: 200 }}>
-        <LoadingButton
-          // loading
-          loading={false}
-          loadingPosition="start"
-          startIcon={<UploadIcon />}
-          variant="outlined"
-          onClick={handleLoadBtnClick}
-        >
-          Load Layer
-        </LoadingButton>
-      </Stack>
     </Box>
   )
 }

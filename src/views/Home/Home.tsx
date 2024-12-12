@@ -2,46 +2,51 @@ import "./Home.css"
 import React, { useCallback, useEffect, useState, useRef } from "react"
 
 import Map from "../../components/map/Map"
-import myConsts from "../../consts/consts"
-
 import ElementWrapper from "../../components/element-wrapper/ElementWrapper"
 import DrawerWrapper from "../../components/drawer/DrawerWrapper"
 // import ClimateContent from "../../components/drawer/ClimateContent"
-import ClimateContent from "../../components/drawer/LayersClimateContent"
+import ClimateContent from "../../components/drawer/ClimateContent"
 
-import { DataLoader } from "../../data-loader/DataLoader"
-
-const climateVariables = [
-  { name: "Sum Precipitation", nick: "sumPrec", geoFile: "Yearly_Precipitation_Sum.json", properties: Array.from({ length: 2100 - 1980 + 1 }, (_, i) => (1980 + i).toString())},
-  { name: "Max Precipitation", nick: "maxPrec", geoFile: "Yearly_Precipitation_Sum.json", properties: Array.from({ length: 2100 - 1980 + 1 }, (_, i) => (1980 + i).toString())},
-
-]
+import { CLIMATE_VARIABLES } from "../../consts/consts"
 
 const Home = () => {
 
-  const [activeClimateVariable, setClimateVariable] = useState<string>("")
-  const [activeYear, setYear] = useState<string>(climateVariables[0].properties[0])
+  // /////////////////////////////////////////////////////////////////////////////////
+  // ////////////////   CLIMATE CONTENT   ////////////////////////////////////////////
+  const initialIdx = 0
+  const [griddedLayerIdx, setGriddedLayerIdx] = useState<number>(initialIdx)
+  const [activeSource, setSource]             = useState<string | null>(CLIMATE_VARIABLES[initialIdx].geoFile)
+  const [gridLayerProps, setGridLayerProps]   = useState<string[] | null>(CLIMATE_VARIABLES[initialIdx].properties)
+  // const [activeProp, setProp]                 = useState<string | null>(CLIMATE_VARIABLES[initialIdx].properties[0])
+  const [activePropIdx, setPropIdx]           = useState<number | null>(initialIdx)
+  const [threshold, setThreshold]             = useState<{value: number, color: string}[] | null>(CLIMATE_VARIABLES[initialIdx].threshold)
+  
+  // /////////////////////////////////////////////////////////////////////////////////
+  // ////////////////   DRAWER   /////////////////////////////////////////////////////
+  
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
-
-  const [griddedLayerIdx, setGriddedLayerIdx] = useState<number>(0)
-  const [activeSource, setSource] = useState<string | null>(climateVariables[0].geoFile)
-  const [griddedLayer, setGriddedLayer] = useState<GeoJSON.FeatureCollection | null>(null)
-  const [gridLayerProps, setGridLayerProps] = useState<string[] | null>(climateVariables[0].properties)
-  const [activeProp, setProp] = useState<string | null>(climateVariables[0].properties[0])
-
-  // const drawerBtns = ["Layers", "Home"]
   const drawerBtns = ["Layers"]
+  // const drawerBtns = ["Layers", "Home"]
 
-  const updateSource = (idx: number) => {  
+  // /////////////////////////////////////////////////////////////////////////////////
+  // ////////////////   UPDATE FUNCTIONS   ///////////////////////////////////////////
+
+  const updateSource = (idx: number) => {
     // check if file exists -- to do
 
     setGriddedLayerIdx(idx)
-    setGridLayerProps(climateVariables[idx].properties)
-    setProp(climateVariables[idx].properties[0])
-    setSource(climateVariables[idx].geoFile)
+    setGridLayerProps(CLIMATE_VARIABLES[idx].properties)
+    // setProp(CLIMATE_VARIABLES[idx].properties[0])
+    setPropIdx(0)
+    setSource(CLIMATE_VARIABLES[idx].geoFile)
+    setThreshold(CLIMATE_VARIABLES[idx].threshold)
   }
 
-  const updateProp = (prop: string) => setProp(prop)
+  // const updateProp = (prop: string, idx: number) => {setProp(prop); setPropIdx(idx)}
+  const updateProp = (propIdx: number) => setPropIdx(propIdx)
+
+  // /////////////////////////////////////////////////////////////////////////////////
+  // ////////////////   RENDER FUNCTIONS   ///////////////////////////////////////////
   
   const renderMenu = () => {
     return  (
@@ -49,12 +54,10 @@ const Home = () => {
         {activeDrawerBtn === 'Layers' && 
           <ClimateContent 
             griddedLayerIdx={griddedLayerIdx} 
-            year={activeYear} setYear={setYear} 
-            climateVariable={activeClimateVariable} 
-            setClimateVariable={setClimateVariable} 
-            climateVariables={climateVariables} 
+            sources={CLIMATE_VARIABLES} 
             properties={gridLayerProps} 
-            activeProp={activeProp}
+            // activeProp={activeProp}
+            activePropIdx={activePropIdx}
             updateSource={updateSource}
             updateProp={updateProp}
             />}
@@ -72,10 +75,9 @@ const Home = () => {
           style="mapbox://styles/carolvfs/clxnzay8z02qh01qkhftqheen" 
           center={[-89.12987909766366, 40.09236099826568] as [number, number]}
           zoom={6}
-          year={activeYear}
-          climateVariable={activeClimateVariable}
           source={activeSource}
-          layerProp={activeProp}
+          layerProp={CLIMATE_VARIABLES[griddedLayerIdx].properties[activePropIdx]}
+          threshold={threshold}
         />
       </ElementWrapper>
     )
@@ -89,24 +91,6 @@ const Home = () => {
       </div>
     )
   }
-
-  // const fetchData = useCallback(() => {
-  //   (async () => {
-  //     const response = await DataLoader.getData()
-  //     if (response.data) {
-  //       setGriddedLayer(response.data)
-      
-  //     }
-  //   })()
-  // }, [])
-
-  // useEffect(() => {
-  //   if (!hasFetchedData.current) {
-  //     fetchData()
-  //     hasFetchedData.current = true
-  //   }
-  // }, [fetchData])
-
   return render()
 }
 

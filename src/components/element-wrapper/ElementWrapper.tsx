@@ -9,7 +9,7 @@ const ElementWrapper = (props: any) => {
       flexDirection: 'column',
       width: props.width,
       height: props.height,
-      backgroundColor: 'purple',
+      // backgroundColor: 'purple',
       margin: '10px',
       padding: '5px'
     }}>
