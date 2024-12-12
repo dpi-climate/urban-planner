@@ -20,41 +20,45 @@ const climateVariables = [
 const Home = () => {
 
   const [activeClimateVariable, setClimateVariable] = useState<string>("")
-  const [activeYear, setYear] = useState<string>("1980")
+  const [activeYear, setYear] = useState<string>(climateVariables[0].properties[0])
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
 
   const [griddedLayerIdx, setGriddedLayerIdx] = useState<number>(0)
+  const [activeSource, setSource] = useState<string | null>(climateVariables[0].geoFile)
   const [griddedLayer, setGriddedLayer] = useState<GeoJSON.FeatureCollection | null>(null)
-  const[gridLayerProps, setGridLayerProps] = useState<string[]>(climateVariables[0].properties)
-  const hasFetchedData = useRef(false)
-
-  const fetchData = useCallback(() => {
-    (async () => {
-      const response = await DataLoader.getData()
-      if (response.data) {
-        setGriddedLayer(response.data)
-      
-      }
-    })()
-  }, [])
-
-  useEffect(() => {
-    if (!hasFetchedData.current) {
-      fetchData()
-      hasFetchedData.current = true
-    }
-  }, [fetchData])
+  const [gridLayerProps, setGridLayerProps] = useState<string[] | null>(climateVariables[0].properties)
+  const [activeProp, setProp] = useState<string | null>(climateVariables[0].properties[0])
 
   // const drawerBtns = ["Layers", "Home"]
   const drawerBtns = ["Layers"]
 
-  // useEffect(() => console.log(activeDrawerBtn), [activeDrawerBtn])
-  // useEffect(() => console.log(activeClimateVariable, activeYear), [activeClimateVariable, activeYear])
+  const updateSource = (idx: number) => {  
+    // check if file exists -- to do
+
+    setGriddedLayerIdx(idx)
+    setGridLayerProps(climateVariables[idx].properties)
+    setProp(climateVariables[idx].properties[0])
+    setSource(climateVariables[idx].geoFile)
+  }
+
+  const updateProp = (prop: string) => setProp(prop)
   
   const renderMenu = () => {
     return  (
       <DrawerWrapper anchor={"right"} buttons={drawerBtns} setBtn={setDrawerBtn}>
-        {activeDrawerBtn === 'Layers' && <ClimateContent griddedLayerIdx={griddedLayerIdx} year={activeYear} setYear={setYear} climateVariable={activeClimateVariable} setClimateVariable={setClimateVariable} climateVariables={climateVariables} properties={gridLayerProps}/>}
+        {activeDrawerBtn === 'Layers' && 
+          <ClimateContent 
+            griddedLayerIdx={griddedLayerIdx} 
+            year={activeYear} setYear={setYear} 
+            climateVariable={activeClimateVariable} 
+            setClimateVariable={setClimateVariable} 
+            climateVariables={climateVariables} 
+            properties={gridLayerProps} 
+            activeProp={activeProp}
+            updateSource={updateSource}
+            updateProp={updateProp}
+            />}
+            
       </DrawerWrapper>
     )
   }
@@ -70,6 +74,8 @@ const Home = () => {
           zoom={6}
           year={activeYear}
           climateVariable={activeClimateVariable}
+          source={activeSource}
+          layerProp={activeProp}
         />
       </ElementWrapper>
     )
@@ -83,6 +89,23 @@ const Home = () => {
       </div>
     )
   }
+
+  // const fetchData = useCallback(() => {
+  //   (async () => {
+  //     const response = await DataLoader.getData()
+  //     if (response.data) {
+  //       setGriddedLayer(response.data)
+      
+  //     }
+  //   })()
+  // }, [])
+
+  // useEffect(() => {
+  //   if (!hasFetchedData.current) {
+  //     fetchData()
+  //     hasFetchedData.current = true
+  //   }
+  // }, [fetchData])
 
   return render()
 }

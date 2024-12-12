@@ -11,6 +11,7 @@ interface IPointLayerProps {
   year: string
   stops: { value: number; color: string }[]
   opacity: number
+  source: string | null
 }
 
 const PointLayer: React.FC<IPointLayerProps> = (props) => {
@@ -20,10 +21,14 @@ const PointLayer: React.FC<IPointLayerProps> = (props) => {
 
   const fetchData = useCallback(() => {
     (async () => {
-      const response = await DataLoader.getData()
-      if (response.data) setGeojsonData(response.data)
+      if(props.source) {
+        console.log(props.source)
+        const response = await DataLoader.getData(props.source)
+        if (response.data) setGeojsonData(response.data)
+          // hasFetchedData.current = false
+      }
     })()
-  }, [props.climateVariable])
+  }, [props.source])
 
   const interpolateColor = useCallback(
     (value: number | null): [number, number, number, number] => {
@@ -87,8 +92,14 @@ const PointLayer: React.FC<IPointLayerProps> = (props) => {
   // }, [fetchData])
 
   useEffect(() => {
+    if (props.source) {
+      fetchData()
+    }
+  }, [props.source, fetchData])
+
+  useEffect(() => {
     if (!props.map || !geojsonData || !props.stops || !props.opacity) return
-    console.log(geojsonData)
+
     const scatterplotLayer = new ScatterplotLayer({
       id: "scatterplot-layer",
       data: geojsonData.features,

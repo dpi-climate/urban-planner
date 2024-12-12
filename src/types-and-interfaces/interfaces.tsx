@@ -11,8 +11,11 @@ export interface DrawerWrapperProps {
 }
 
 export interface DrawerWrapperContentProps {
+  updateSource: (idx: number) => void
+  updateProp: (prop: string) => void
   griddedLayerIdx: number
-  properties: string[]
+  properties: string[] | null
+  activeProp: string | null
   climateVariables: {name: string, nick: string, geoFile: string, properties: string[]}[]
   climateVariable: string
   setClimateVariable: (layer: string) => void

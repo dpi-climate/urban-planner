@@ -22,22 +22,64 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
   const [secondDropdown, setSecondDropdown] = useState<string>('')
   const [thirdDropdown, setThirdDropdown] = useState<string>('')
 
-  const handleFirstDropdownChange = (event: SelectChangeEvent) => {
-    // setFirstDropdown(event.target.value)
+
+  const renderFileDropdown = () => {
+    return (
+      <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
+        <InputLabel>Source</InputLabel>
+        <Select
+          value={`${props.griddedLayerIdx}`}
+          label={props.climateVariables[props.griddedLayerIdx].name}
+          onChange={(event: SelectChangeEvent) => props.updateSource(parseInt(event.target.value))}
+        >
+          {
+            props.climateVariables.map((obj: {name: string, nick: string, properties: string[]}, idx: number) => <MenuItem key={`year_key_${obj.nick}`} value={idx}>{obj.name}</MenuItem>)
+          }
+        </Select>
+      </FormControl>
+    )
   }
 
-  const handleLoadBtnClick = () => {
-    if(firstDropdown && secondDropdown) {
-      const layerStr = `Yearly_${secondDropdown}_Sum.json`
-      if(props.climateVariable !== secondDropdown) {
-        props.setClimateVariable(layerStr)
-      }
-
-      if(props.year != firstDropdown) {
-        props.setYear(firstDropdown)
-      }
-
+  const renderProperties = () => {
+    if(props.properties && props.activeProp) {
+      return (
+        <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
+        <InputLabel>Property</InputLabel>
+        <Select
+          value={props.activeProp}
+          label="Props"
+          onChange={(event: SelectChangeEvent) => props.updateProp(event.target.value)}
+        >
+          {
+            
+            props.properties.map((p: string) => <MenuItem key={`dropdown_prop_key_${p}`} value={p}>{p}</MenuItem>)
+          }
+        </Select>
+      </FormControl>
+      )
+      
+    } else {
+      return null
     }
+
+  }
+
+  const renderUploadBtn = () => {
+    return (
+      // <Stack direction="row" spacing={2} sx={{ margin: 1, maxWidth: 200 }}></Stack>
+      <Stack direction="row" sx={{ margin: 1, maxWidth: 200 }}>
+        <LoadingButton
+          // loading
+          loading={false}
+          loadingPosition="start"
+          startIcon={<UploadIcon />}
+          variant="outlined"
+          // onClick={handleLoadBtnClick}
+        >
+          Load Layer
+        </LoadingButton>
+      </Stack>
+    )
   }
 
   return (
@@ -47,53 +89,9 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
         {subtitle}
       </Typography>
 
-      {/* Geojson Dropdown */}
-      <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-        <InputLabel>Variable</InputLabel>
-        <Select
-          // value={secondDropdown}
-          // value={props.activeGriddedLayerObj}
-          // value={props.climateVariables[props.griddedLayerIdx].name}
-          value={`${props.griddedLayerIdx}`}
-          label={props.climateVariables[props.griddedLayerIdx].name}
-          // onChange={handleFirstDropdownChange}
-        >
-          {
-            props.climateVariables.map((obj: {name: string, nick: string, properties: string[]}, idx: number) => <MenuItem key={`year_key_${obj.nick}`} value={idx}>{obj.name}</MenuItem>)
-          }
-        </Select>
-      </FormControl>
+      {renderFileDropdown()}
+      {renderProperties()}
       
-      {/* Second Dropdown */}
-      {/* <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-        <InputLabel>Property</InputLabel>
-        <Select
-          value={firstDropdown}
-          label="Year"
-          onChange={handleFirstDropdownChange}
-        >
-          {
-            
-            // myConsts.years.map((y: number) => <MenuItem key={`year_key_${y}`} value={y}>{y}</MenuItem>)
-            props.properties.map((y: string) => <MenuItem key={`year_key_${y}`} value={y}>{y}</MenuItem>)
-          }
-        </Select>
-      </FormControl> */}
-
-      {/* Update Button */}
-      {/* <Stack direction="row" spacing={2} sx={{ margin: 1, maxWidth: 200 }}> */}
-      <Stack direction="row" sx={{ margin: 1, maxWidth: 200 }}>
-        <LoadingButton
-          // loading
-          loading={false}
-          loadingPosition="start"
-          startIcon={<UploadIcon />}
-          variant="outlined"
-          onClick={handleLoadBtnClick}
-        >
-          Load Layer
-        </LoadingButton>
-      </Stack>
     </Box>
   )
 }

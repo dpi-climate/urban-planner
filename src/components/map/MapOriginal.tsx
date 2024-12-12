@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import PointLayer from "./PointLayer"
 
+// const opacity = 255 // Set opacity for valid values (0 to 255)
 const stops = [
   { value: 0, color: "#FFFFFF" },
   { value: 76.2, color: "#E0F3DB" },
@@ -37,16 +38,20 @@ interface IMap {
   climateVariable: string
   source: string | null
   layerProp: string | null
+  // geoFile: string
+
 }
 
 const Map: React.FC<IMap> = (props) => {
+
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const [map, setMap] = useState<mapboxgl.Map | null>(null) 
-  const [opacity, setOpacity] = useState<number>(255) 
+  const [opacity, setOpacity] = useState<number>(255) // Set opacity for valid values (0 to 255)
 
   const startMap = useCallback(() => {
     if (!mapContainerRef.current) return
 
+    // Initialize map only once
     const mapInstance = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: props.style,
@@ -54,70 +59,34 @@ const Map: React.FC<IMap> = (props) => {
       zoom: props.zoom
     })
 
-    // Once the map loads, set up terrain if you have a DEM source in your style
-    mapInstance.on('load', () => {
-      // If needed, add a DEM source and set the terrain:
-      mapInstance.addSource('my-terrain-source', {
-        "type": "raster-dem",
-        "url": "mapbox://mapbox.terrain-rgb",
-        "tileSize": 512,
-        "maxzoom": 14
-      });
-      mapInstance.setTerrain({ source: 'my-terrain-source' });
-    });
-
     setMap(mapInstance)
 
+    // Cleanup function to remove the map on component unmount
     return () => mapInstance.remove()
 
   },[])
 
   useEffect(() => startMap(), [startMap])
 
-  // Add a click event to get lat/lon and elevation
-  useEffect(() => {
-    if (!map) return
-
-    map.on('click', (e) => {
-      const { lng, lat } = e.lngLat
-
-      let elevation: number | null | undefined = null
-
-      // queryTerrainElevation returns elevation in meters if a terrain is set
-      if (map.queryTerrainElevation) {
-        elevation = map.queryTerrainElevation(e.lngLat) ?? null  // meters
-      }
-
-      console.log('Clicked location:', { lat, lng, elevation })
-    })
-
-    return () => {
-      if (map) {
-        map.off('click', () => {})
-      }
-    }
-  }, [map])
-
   const renderLayers = () => {
-    return (
+    return(
       <>
-        <PointLayer
-          map={map}
-          climateVariable={props.climateVariable}
-          year={props.layerProp}
-          opacity={opacity}
-          stops={stops}
-          source={props.source}
-        />
+        <PointLayer map={map} climateVariable={props.climateVariable} year={props.layerProp} opacity={opacity} stops={stops} source={props.source}/>
       </>
     )
   }
   
   return (
     <div className="map-container" ref={mapContainerRef}>
-      {map && renderLayers()}
+      { map &&
+      <>
+        {renderLayers()}
+      </>
+            
+      }
+
     </div>
-  )
+  ) 
 }
 
 export default Map
