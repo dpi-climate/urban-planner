@@ -36,7 +36,7 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
   }
 
   const renderProperties = () => {
-    console.log(props.sources, props.griddedLayerIdx, props.activePropIdx, props.sources && props.griddedLayerIdx && props.activePropIdx)
+    // console.log(props.sources, props.griddedLayerIdx, props.activePropIdx, props.sources && props.griddedLayerIdx && props.activePropIdx)
     if(props.sources && props.activePropIdx !== null) {
       return (
         <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>

@@ -18,7 +18,7 @@ const Home = () => {
   const [activeSource, setSource]             = useState<string | null>(CLIMATE_VARIABLES[initialIdx].geoFile)
   const [gridLayerProps, setGridLayerProps]   = useState<string[] | null>(CLIMATE_VARIABLES[initialIdx].properties)
   // const [activeProp, setProp]                 = useState<string | null>(CLIMATE_VARIABLES[initialIdx].properties[0])
-  const [activePropIdx, setPropIdx]           = useState<number | null>(initialIdx)
+  const [activePropIdx, setPropIdx]           = useState<number>(initialIdx)
   const [threshold, setThreshold]             = useState<{value: number, color: string}[] | null>(CLIMATE_VARIABLES[initialIdx].threshold)
   
   // /////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,12 @@ const Home = () => {
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
   const drawerBtns = ["Layers"]
   // const drawerBtns = ["Layers", "Home"]
+  const infoDrawerBtns = ["Close"]
 
+  // /////////////////////////////////////////////////////////////////////////////////
+  // ////////////////   MAP   ////////////////////////////////////////////////////////
+  const [clickedLocal, setClickedLocal] = useState<{lat:number, lng: number, elevation: number | null} | null>(null)
+  
   // /////////////////////////////////////////////////////////////////////////////////
   // ////////////////   UPDATE FUNCTIONS   ///////////////////////////////////////////
 
@@ -78,8 +83,20 @@ const Home = () => {
           source={activeSource}
           layerProp={CLIMATE_VARIABLES[griddedLayerIdx].properties[activePropIdx]}
           threshold={threshold}
+          setClickedLocal={setClickedLocal}
         />
       </ElementWrapper>
+    )
+  }
+
+  const renderInfoDrawer = () => {
+    return (
+      <DrawerWrapper 
+        anchor={"bottom"} 
+        clickedLocal={clickedLocal} 
+        setClickedLocal={setClickedLocal}>
+        Content
+      </DrawerWrapper>
     )
   }
 
@@ -88,6 +105,7 @@ const Home = () => {
       <div className="home">
         { renderMenu() }
         { renderMap() }
+        {renderInfoDrawer()}
       </div>
     )
   }

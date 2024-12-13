@@ -1,14 +1,18 @@
-import * as React from 'react'
+// import * as React from 'react'
+import React, { useEffect } from 'react'
 
 import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Button from '@mui/material/Button'
 import SwipeableDrawer from '@mui/material/SwipeableDrawer'
 import Box from '@mui/material/Box'
+
 import InfoIcon from '@mui/icons-material/Info'
 import HomeIcon from '@mui/icons-material/Home'
+import CloseIcon from '@mui/icons-material/Close'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LayersIcon from '@mui/icons-material/Layers'
 import EvStationIcon from '@mui/icons-material/EvStation'
+
 import Tooltip from '@mui/material/Tooltip'
 
 import { DrawerWrapperProps } from '../../types-and-interfaces/interfaces'
@@ -74,13 +78,13 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [transitionDuration, setTransitionDuration] = React.useState(0)
   const [transitionEasing, setTransitionEasing] = React.useState('')
-  const [currentButton, setCurrentButton] = React.useState<string | null>(null)
+  // const [currentButton, setCurrentButton] = React.useState<string | null>(null)
   const theme = useTheme()
 
   const enteringScreen = 800
   const leavingScreen = 800
 
-  const size = { top: 350, bottom: 350, left: 350, right: 350 }
+  const size = { top: 350, bottom: 300, left: 350, right: 350 } // Drawer size
 
   const toggleDrawer =
     (open: boolean, label?: string) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -99,12 +103,12 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       const easing = open
         ? theme.transitions.easing.easeOut
         : theme.transitions.easing.sharp
-
+      console.log("open: ", open)
       setTransitionDuration(duration)
       setTransitionEasing(easing)
       setIsOpen(open)
 
-      if(open && label) props.setBtn(label)
+      if(open && label && props.setBtn) props.setBtn(label)
 
     }
 
@@ -146,7 +150,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
           ...commonStyles,
           top: 0,
           left: 0,
-          transform: isOpen ? `translateY(${size.top}px)` : 'translateY(0)',
+          transform: isOpen ? `translateY(${size.top + 20}px)` : 'translateY(0)',
           flexDirection: 'row',
           width: '100vw',
         }
@@ -155,7 +159,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
           ...commonStyles,
           bottom: 0,
           left: 0,
-          transform: isOpen ? `translateY(-${size.bottom}px)` : 'translateY(0)',
+          transform: isOpen ? `translateY(-${size.bottom + 20}px)` : 'translateY(0)',
           flexDirection: 'row',
           width: '100vw',
         }
@@ -164,16 +168,40 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
     }
   }
 
-  return (
-    <div style={{ position: 'relative' }}>
-      <React.Fragment key={`drawer-${props.anchor}`}>
-
-        {/* Toggles */}
+  const renderBtns = () => {
+    if(props.buttons) {
+      return (
         <Buttons
           buttons={props.buttons}
           onButtonClick={handleButtonClick}
           buttonContainerStyle={getButtonContainerStyle()}
         />
+      )
+    } else {
+      return null
+    }
+  }
+
+  useEffect(() => {
+    // if (props.clickedLocal !== null ) {
+      if (props.clickedLocal) {
+      setTransitionDuration(props.clickedLocal ? enteringScreen : leavingScreen);
+      setTransitionEasing(
+        props.clickedLocal ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp
+      );
+      setIsOpen(true);
+      if (!props.clickedLocal && props.setClickedLocal) {
+        props.setClickedLocal(null);
+      }
+    }
+  }, [props.clickedLocal, props.setClickedLocal, theme.transitions.easing]);
+  
+  return (
+    <div style={{ position: 'relative' }}>
+      <React.Fragment key={`drawer-${props.anchor}`}>
+
+        {/* Toggles */}
+        { renderBtns() }
 
         {/* Drawer */}
         <SwipeableDrawer
@@ -190,11 +218,26 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
             exit: leavingScreen,
           }}
         >
+          {/* Close Button */}
+          {!props.buttons && (
+            <Button
+              onClick={toggleDrawer(false)}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                zIndex: 1200,
+                minWidth: 'auto',
+                padding: 0,
+              }}
+            >
+              <CloseIcon />
+            </Button>
+          )}
           {/* Drawer Content */}
           {props.children}
           
-          
-          
+          {/* I forgot what this box is */}
           <Box
             sx={{
               width: props.anchor === 'left' || props.anchor === 'right' ? size[props.anchor] : 'auto',

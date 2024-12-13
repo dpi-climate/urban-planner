@@ -1,5 +1,5 @@
 import "./Map.css"
-import React, { useRef, useState, useCallback, useEffect } from "react"
+import React, { useRef, useState, useCallback, useEffect, SetStateAction, Dispatch } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import PointLayer from "./PointLayer"
@@ -13,6 +13,9 @@ interface IMap {
   source: string | null
   layerProp: string | null
   threshold: {value: number, color: string}[] | null
+  // setClickedLocal: (lat:number, lng: number, elevation: number | null ) => void
+  setClickedLocal: Dispatch<SetStateAction<{ lat: number; lng: number; elevation: number | null; } | null>>
+
 }
 
 const Map: React.FC<IMap> = (props) => {
@@ -64,7 +67,9 @@ const Map: React.FC<IMap> = (props) => {
         elevation = map.queryTerrainElevation(e.lngLat) ?? null  // meters
       }
 
-      console.log('Clicked location:', { lat, lng, elevation })
+      props.setClickedLocal({lat, lng, elevation})
+
+      // console.log('Clicked location:', { lat, lng, elevation })
     })
 
     return () => {
@@ -77,13 +82,13 @@ const Map: React.FC<IMap> = (props) => {
   const renderLayers = () => {
     return (
       <>
-        <PointLayer
+        {/* <PointLayer
           map={map}
           layerProp={props.layerProp}
           opacity={opacity}
           threshold={props.threshold}
           source={props.source}
-        />
+        /> */}
       </>
     )
   }

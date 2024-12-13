@@ -3,11 +3,11 @@ import { Anchor } from "./types"
 
 export interface DrawerWrapperProps {
   anchor: Anchor
-  buttons: string[]
-  setBtn: Dispatch<SetStateAction<string | null>>
+  clickedLocal?: {lat:number, lng: number, elevation: number | null} | null
+  setClickedLocal?: Dispatch<SetStateAction<{ lat: number; lng: number; elevation: number | null; } | null>>
+  buttons?: string[]
+  setBtn?: Dispatch<SetStateAction<string | null>>
   children?: React.ReactNode
-  // setLayerStr?: (layer: string) => void
-  // setYear?: (year: string) => void
 }
 
 export interface DrawerWrapperContentProps {
