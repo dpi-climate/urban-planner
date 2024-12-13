@@ -3,19 +3,20 @@ import { Anchor } from "./types"
 
 export interface DrawerWrapperProps {
   anchor: Anchor
-  buttons: string[]
-  setBtn: Dispatch<SetStateAction<string | null>>
+  clickedLocal?: {lat:number, lng: number, elevation: number | null} | null
+  setClickedLocal?: Dispatch<SetStateAction<{ lat: number; lng: number; elevation: number | null; } | null>>
+  buttons?: string[]
+  setBtn?: Dispatch<SetStateAction<string | null>>
   children?: React.ReactNode
-  // setLayerStr?: (layer: string) => void
-  // setYear?: (year: string) => void
 }
 
 export interface DrawerWrapperContentProps {
+  updateSource: (idx: number) => void
+  // updateProp: (prop: string) => void
+  updateProp: (propIdx: number) => void
   griddedLayerIdx: number
-  properties: string[]
-  climateVariables: {name: string, nick: string, geoFile: string, properties: string[]}[]
-  climateVariable: string
-  setClimateVariable: (layer: string) => void
-  year: string
-  setYear: (year: string) => void
+  properties: string[] | null
+  // activeProp: string | null
+  activePropIdx: number | null
+  sources: {name: string, id: string, geoFile: string, properties: string[]}[]
 }
