@@ -62,8 +62,9 @@ const myConsts = {
 export const CLIMATE_VARIABLES = [
   { 
     name: "Min Temperature", 
-    id: "minTemp", 
-    geoFile: "Yearly_tmin.json", 
+    id: "tmin", 
+    // geoFile: "Yearly_tmin.json", 
+    geoFile: "tmin", 
     properties: Array.from({ length: 2100 - 1980 + 1 }, (_, i) => (1980 + i).toString()),
     threshold: [
       { value: -30   , color: "#FFFFFF"},
@@ -92,8 +93,8 @@ export const CLIMATE_VARIABLES = [
   },
   { name: 
     "Max Temperature", 
-    id: "maxTemp", 
-    geoFile: "Yearly_tmax.json", 
+    id: "tmax", 
+    geoFile: "tmax", 
     properties: Array.from({ length: 2100 - 1980 + 1 }, (_, i) => (1980 + i).toString()),
     threshold: [
       { value: 0   , color: "#FFFFFF"},
@@ -122,8 +123,8 @@ export const CLIMATE_VARIABLES = [
   },
   { 
     name: "Total Precipitation", 
-    id: "totalPrec", 
-    geoFile: "Yearly_prcp.json", 
+    id: "prcp", 
+    geoFile: "prcp", 
     properties: Array.from({ length: 2100 - 1980 + 1 }, (_, i) => (1980 + i).toString()),
     threshold: [
       { value: 0.0, color: '#FFFFFF'},
@@ -151,20 +152,21 @@ export const CLIMATE_VARIABLES = [
 
 ]
 
-export const sources = [
-  { 
-    name: "Min Temperature",
-    id: 1,  
-  },
-  { name: 
-    "Max Temperature", 
-    id: 2  
-  },
-  { 
-    name: "Total Precipitation", 
-    id: 3, 
-  },
+// export const BAR_CHART_DATA = [
+//     { category: "A", value: 30 },
+//     { category: "B", value: 50 },
+//     { category: "C", value: 80 },
+// ]
 
+export const BAR_CHART_DATA = Array.from({ length: 120 }, (_, i) => ({
+  category: `Category ${i + 1}`,
+  value: Math.floor(Math.random() * 100) + 1, // Random value between 1 and 100
+}));
+
+export const LINE_CHART_DATA = [
+    { date: new Date(2023, 0, 1), value: 30 },
+    { date: new Date(2023, 1, 1), value: 50 },
+    { date: new Date(2023, 2, 1), value: 80 },
 ]
 
 // export default myConsts

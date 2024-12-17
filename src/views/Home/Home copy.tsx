@@ -21,18 +21,6 @@ const Home = () => {
   // const [activeProp, setProp]                 = useState<string | null>(CLIMATE_VARIABLES[initialIdx].properties[0])
   const [activePropIdx, setPropIdx]           = useState<number>(initialIdx)
   const [threshold, setThreshold]             = useState<{value: number, color: string}[] | null>(CLIMATE_VARIABLES[initialIdx].threshold)
-
-  const [currentSource, setCurrentSource] = useState<{
-    source: string | null,
-    layerProp: string[] | null,
-    threshold: {value: number, color: string}[] | null
-  
-  }>({
-    // source: CLIMATE_VARIABLES[initialIdx].geoFile,
-    source: CLIMATE_VARIABLES[initialIdx].id,
-    layerProp: CLIMATE_VARIABLES[initialIdx].properties,
-    threshold: CLIMATE_VARIABLES[initialIdx].threshold,
-  });
   
   // /////////////////////////////////////////////////////////////////////////////////
   // ////////////////   DRAWER   /////////////////////////////////////////////////////
@@ -53,15 +41,8 @@ const Home = () => {
     setGriddedLayerIdx(idx)
     setGridLayerProps(CLIMATE_VARIABLES[idx].properties)
     setPropIdx(0)
-    // setSource(CLIMATE_VARIABLES[idx].geoFile)
-    setSource(CLIMATE_VARIABLES[idx].id)
+    setSource(CLIMATE_VARIABLES[idx].geoFile)
     setThreshold(CLIMATE_VARIABLES[idx].threshold)
-    setCurrentSource({
-      // source: CLIMATE_VARIABLES[idx].geoFile,
-      source: CLIMATE_VARIABLES[idx].id,
-      layerProp: CLIMATE_VARIABLES[idx].properties,
-      threshold: CLIMATE_VARIABLES[idx].threshold,
-    })
   }
 
   // const updateProp = (prop: string, idx: number) => {setProp(prop); setPropIdx(idx)}
@@ -99,7 +80,6 @@ const Home = () => {
           source={activeSource}
           layerProp={CLIMATE_VARIABLES[griddedLayerIdx].properties[activePropIdx]}
           threshold={threshold}
-          currentSource={currentSource}
           clickedLocal={clickedLocal}
           setClickedLocal={setClickedLocal}
         />

@@ -12,11 +12,13 @@ export interface DrawerWrapperProps {
 
 export interface DrawerWrapperContentProps {
   updateSource: (idx: number) => void
-  // updateProp: (prop: string) => void
   updateProp: (propIdx: number) => void
   griddedLayerIdx: number
   properties: string[] | null
-  // activeProp: string | null
   activePropIdx: number | null
   sources: {name: string, id: string, geoFile: string, properties: string[]}[]
+}
+
+export interface InfoContentProps {
+  clickedLocal: {lat:number, lng: number, elevation: number | null} | null
 }

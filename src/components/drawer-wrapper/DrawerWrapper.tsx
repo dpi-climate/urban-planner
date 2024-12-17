@@ -103,12 +103,13 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       const easing = open
         ? theme.transitions.easing.easeOut
         : theme.transitions.easing.sharp
-      console.log("open: ", open)
+
       setTransitionDuration(duration)
       setTransitionEasing(easing)
       setIsOpen(open)
 
       if(open && label && props.setBtn) props.setBtn(label)
+      if(!open && props.setClickedLocal) props.setClickedLocal(null)
 
     }
 
@@ -218,8 +219,17 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
             exit: leavingScreen,
           }}
         >
-          {/* Close Button */}
-          {!props.buttons && (
+          {/* Drawer Content Wrapper */}
+          <Box
+            sx={{
+              width: props.anchor === 'left' || props.anchor === 'right' ? `${size[props.anchor]}px` : '100vw',
+              height: props.anchor === 'top' || props.anchor === 'bottom' ? `${size[props.anchor]}px` : '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden', // Prevents overflow outside
+            }}
+          >
+            {/* Close Button */}
             <Button
               onClick={toggleDrawer(false)}
               sx={{
@@ -233,19 +243,20 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
             >
               <CloseIcon />
             </Button>
-          )}
-          {/* Drawer Content */}
-          {props.children}
-          
-          {/* I forgot what this box is */}
-          <Box
-            sx={{
-              width: props.anchor === 'left' || props.anchor === 'right' ? size[props.anchor] : 'auto',
-              height: props.anchor === 'top' || props.anchor === 'bottom' ? size[props.anchor] : 'auto',
-            }}
-          />
+
+            {/* Scrollable Content */}
+            <Box
+              sx={{
+                flex: 1, // Allows this Box to take the available space
+                overflowY: 'auto', // Enables vertical scrolling
+                overflowX: 'hidden', // Prevents horizontal scrolling
+                padding: 2, // Adds padding around content
+              }}
+            >
+              {props.children}
+            </Box>
+          </Box>
         </SwipeableDrawer>
-      
       </React.Fragment>
     </div>
   )
