@@ -30,6 +30,7 @@ interface IMap {
 const Map: React.FC<IMap> = (props) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const [map, setMap] = useState<mapboxgl.Map | null>(null)
+  const [currentZoom, setCurrentZoom] = useState<number>(props.zoom)
 
   const startMap = useCallback(() => {
     if (!mapContainerRef.current) return
@@ -49,6 +50,10 @@ const Map: React.FC<IMap> = (props) => {
         maxzoom: 14,
       })
       mapInstance.setTerrain({ source: "my-terrain-source" })
+    })
+
+    mapInstance.on("zoom", () => {
+      setCurrentZoom(mapInstance.getZoom())
     })
 
     setMap(mapInstance)
@@ -73,7 +78,7 @@ const Map: React.FC<IMap> = (props) => {
       opacity={255}
       threshold={props.threshold}
       source={props.source}
-      currentSource={props.currentSource}
+      currentZoom={currentZoom}
     />
     </>
   }

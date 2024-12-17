@@ -1,8 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { ScatterplotLayer } from "@deck.gl/layers"
+import React, { useEffect, useMemo, useState } from "react"
+import { ScatterplotLayer, ScatterplotLayerProps  } from "@deck.gl/layers"
 import { MapboxOverlay } from "@deck.gl/mapbox"
-import chroma from "chroma-js"
 import { DataLoader } from "../../data-loader/DataLoader"
+
+interface IBinaryData {
+  length: number;
+  attributes: {
+    getPosition: { value: Float32Array; size: number };
+    getFillColor: { value: Uint8Array; size: number };
+    getRadius: { value: Float32Array; size: number };
+  };
+}
 
 interface IPointLayerProps {
   map: mapboxgl.Map | null
@@ -10,150 +18,86 @@ interface IPointLayerProps {
   threshold: { value: number; color: string }[] | null
   opacity: number
   source: string | null
+  currentZoom: number
 }
 
-// Simple in-memory cache for previously fetched data
-const dataCache: Record<string, GeoJSON.FeatureCollection> = {}
-
 const PointLayer: React.FC<IPointLayerProps> = (props) => {
-  const overlayRef = useRef<MapboxOverlay | null>(null)
 
-  // Active states represent the currently displayed layer configuration
-  const [activeSource, setActiveSource] = useState<string | null>(null)
-  const [activeLayerProp, setActiveLayerProp] = useState<string | null>(null)
-  const [activeThreshold, setActiveThreshold] = useState<{ value: number; color: string }[] | null>(null)
-  const [activeGeojson, setActiveGeojson] = useState<GeoJSON.FeatureCollection | null>(null)
-
-  // Track loading state when source changes
-  const [loading, setLoading] = useState(false)
+  const [binaryData, setBinaryData] = useState<IBinaryData | null>(null)
 
   useEffect(() => {
-    // Fetch data only if the source changes
-    const updateForNewSource = async () => {
-      if (!props.source || props.source === activeSource) return
-  
-      setLoading(true)
-  
-      let newGeojson = dataCache[props.source]
-      if (!newGeojson) {
+
+    if (!props.source) return
+
+    let isMounted = true;
+
+    (async () => {
+      if (!props.source) return
+
+      try {
         const response = await DataLoader.getData(props.source)
-        newGeojson = response.data ?? null
-        if (newGeojson) {
-          dataCache[props.source] = newGeojson
+        const data = response.data
+
+        if (!isMounted || !data) return
+
+        // Convert numeric arrays to typed arrays
+        const positions = new Float32Array(data.positions)
+        const colors = new Uint8Array(data.colors)
+        const radii = new Float32Array(data.radii)
+
+        const binary: IBinaryData = {
+          length: data.length,
+          attributes: {
+            getPosition: { value: positions, size: 2 },
+            getFillColor: { value: colors, size: 4 },
+            getRadius: { value: radii, size: 1 },
+          },
         }
+
+        setBinaryData(binary)
+
+      } catch (err) {
+        console.error("Error fetching binary data:", err)
+        setBinaryData(null)
+
       }
-  
-      // Update all active states after fetching
-      setActiveSource(props.source)
-      setActiveLayerProp(props.layerProp)
-      setActiveThreshold(props.threshold)
-      setActiveGeojson(newGeojson)
-      setLoading(false)
+    })()
+
+    return () => {
+      isMounted = false
     }
-  
-    updateForNewSource()
-  }, [props.source]) // Depend only on props.source for fetching
-  
-  
-  useEffect(() => {
-    // If the source hasn't changed and we're not loading,
-    // just update layerProp and threshold as needed
-    if (props.source === activeSource && !loading) {
-      if (props.layerProp !== activeLayerProp) {
-        setActiveLayerProp(props.layerProp)
-      }
-      if (props.threshold !== activeThreshold) {
-        setActiveThreshold(props.threshold)
-      }
-    }
-  }, [props.source, props.layerProp, props.threshold, activeSource, activeLayerProp, activeThreshold, loading])
-  
 
-  /**
-   * If only the layerProp or threshold changes (and the source stays the same),
-   * update immediately without refetching.
-   */
-  useEffect(() => {
-    if (props.source === activeSource && !loading) {
-      if (props.layerProp !== activeLayerProp) {
-        setActiveLayerProp(props.layerProp)
-      }
-      if (props.threshold !== activeThreshold) {
-        setActiveThreshold(props.threshold)
-      }
-    }
-  }, [props.source, props.layerProp, props.threshold, activeSource, activeLayerProp, activeThreshold, loading])
+  },[props.source])
 
-  // Interpolate color based on thresholds
-  const interpolateColor = useCallback(
-    (value: number | null): [number, number, number, number] => {
-      if (value === null || value === undefined || !activeThreshold) {
-        return [0, 0, 0, 0] // Transparent for invalid values or no threshold
-      }
-
-      let lower = activeThreshold[0]
-      let upper = activeThreshold[activeThreshold.length - 1]
-
-      for (let i = 0; i < activeThreshold.length - 1; i++) {
-        if (value >= activeThreshold[i].value && value <= activeThreshold[i + 1].value) {
-          lower = activeThreshold[i]
-          upper = activeThreshold[i + 1]
-          break
-        }
-      }
-
-      const t = (value - lower.value) / (upper.value - lower.value)
-      const color = chroma.mix(lower.color, upper.color, t).rgba()
-      return [color[0], color[1], color[2], 255]
-    },
-    [activeThreshold]
-  )
-
-  // Define getFillColor accessor
-  const getFillColor = useMemo(() => {
-    return (d: any): [number, number, number, number] => {
-      // If loading new data or active configuration not ready, render transparent
-      if (loading || !activeLayerProp || !activeGeojson) {
-        return [0, 0, 0, 0]
-      }
-
-      const value = d.properties?.[activeLayerProp]
-      if (value === null || value === undefined || value === 0) {
-        return [0, 0, 0, 0] // Transparent for invalid values
-      }
-
-      const baseColor = interpolateColor(value)
-      return [baseColor[0], baseColor[1], baseColor[2], props.opacity]
-    }
-  }, [loading, activeLayerProp, activeGeojson, props.opacity, interpolateColor])
-
-  // Update the ScatterplotLayer
-  const updateLayer = useCallback(() => {
-    if (!props.map || !activeGeojson || !activeSource || !activeLayerProp || !activeThreshold) return
-
-    const scatterplotLayer = new ScatterplotLayer({
-      id: "scatterplot-layer",
-      data: activeGeojson.features,
-      getPosition: (d: any) => d.geometry.coordinates,
-      getRadius: (d: any) => d.properties.radius || 500,
-      getFillColor,
-      updateTriggers: {
-        getFillColor: [activeLayerProp, activeThreshold, props.opacity, loading],
-      },
-      pickable: true,
-    })
-
-    if (!overlayRef.current) {
-      overlayRef.current = new MapboxOverlay({ layers: [scatterplotLayer] })
-      props.map.addControl(overlayRef.current as unknown as mapboxgl.IControl)
-    } else {
-      overlayRef.current.setProps({ layers: [scatterplotLayer] })
-    }
-  }, [props.map, activeGeojson, activeSource, activeLayerProp, activeThreshold, props.opacity, getFillColor, loading])
+  const layers = useMemo(() => {
+    if (!binaryData) return [];
+    return [
+      new ScatterplotLayer({
+        id: "scatterplot-layer",
+        data: binaryData,
+        getPosition: "getPosition" as unknown as ScatterplotLayerProps<any>["getPosition"],
+        getFillColor: "getFillColor" as unknown as ScatterplotLayerProps<any>["getFillColor"],
+        getRadius: "getRadius" as unknown as ScatterplotLayerProps<any>["getRadius"],
+        // radiusMinPixels,
+        // radiusMaxPixels,
+        // opacity: opacity / 255,
+        pickable: false,
+      }),
+    ];
+  }, [binaryData, props.opacity])
 
   useEffect(() => {
-    updateLayer()
-  }, [updateLayer])
+    if (!props.map || layers.length === 0) return
+
+    // Create the MapboxOverlay and add it as a control to the map
+    const overlay = new MapboxOverlay({ layers });
+    props.map.addControl(overlay as unknown as mapboxgl.IControl)
+
+    return () => {
+      if (!props.map) return
+      props.map.removeControl(overlay as unknown as mapboxgl.IControl)
+    };
+  }, [props.map, layers])
 
   return null
 }
