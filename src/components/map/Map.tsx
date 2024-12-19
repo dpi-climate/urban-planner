@@ -12,7 +12,8 @@ interface IMap {
   style: string
   center: [number, number]
   zoom: number
-  source: string | null
+  // source: string | null
+  source: string
   layerProp: string | null
   threshold: { value: number; color: string }[] | null
   setClickedLocal: React.Dispatch<
@@ -23,6 +24,7 @@ interface IMap {
     source: string | null,
     layerProp: string[] | null,
     threshold: {value: number, color: string}[] | null
+    currentLayer: { varId: string , year: string }
   
   }
 }
@@ -75,10 +77,11 @@ const Map: React.FC<IMap> = (props) => {
     <PointLayer
       map={map}
       layerProp={props.layerProp}
-      opacity={255}
+      opacity={1}
       threshold={props.threshold}
       source={props.source}
       currentZoom={currentZoom}
+      currentLayer={props.currentLayer}
     />
     </>
   }

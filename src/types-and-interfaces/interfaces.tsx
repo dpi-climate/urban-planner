@@ -11,6 +11,7 @@ export interface DrawerWrapperProps {
 }
 
 export interface DrawerWrapperContentProps {
+  updateLayer: (varId: string | null, year: string | null) => void
   updateSource: (idx: number) => void
   updateProp: (propIdx: number) => void
   griddedLayerIdx: number

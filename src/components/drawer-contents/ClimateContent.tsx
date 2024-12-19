@@ -18,14 +18,17 @@ const subtitle = ""
 
 const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
 
-  const renderFileDropdown = () => {
+  const renderVariableDropdown = () => {
     return (
       <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
         <InputLabel>Source</InputLabel>
         <Select
-          value={`${props.griddedLayerIdx}`}
+          // value={`${props.griddedLayerIdx}`}
+          // label={props.sources[props.griddedLayerIdx].name}
+          // onChange={(event: SelectChangeEvent) => props.updateSource(parseInt(event.target.value))}
+          value={props.currentLayer.varId}
           label={props.sources[props.griddedLayerIdx].name}
-          onChange={(event: SelectChangeEvent) => props.updateSource(parseInt(event.target.value))}
+          onChange={(event: SelectChangeEvent) => props.updateLayer(props.sources[parseInt(event.target.value)].id, null)}
         >
           {
             props.sources.map((obj: {name: string, id: string, properties: string[]}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
@@ -43,11 +46,17 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
           <InputLabel>Colors</InputLabel>
           <Select
             value={props.activePropIdx.toString()}
-            label={props.sources[props.griddedLayerIdx].properties[props.activePropIdx]}
-            onChange={(event: SelectChangeEvent) => props.updateProp(parseInt(event.target.value))}
+            // label={props.sources[props.griddedLayerIdx].properties[props.activePropIdx]}
+            // onChange={(event: SelectChangeEvent) => props.updateProp(parseInt(event.target.value))}
+            value={props.currentLayer.year}
+            label={props.currentLayer.year}
+            onChange={(event: SelectChangeEvent) => props.updateLayer(null, event.target.value)}
           >
-            {
+            {/* {
               props.sources[props.griddedLayerIdx].properties.map((p: string, i: number) => <MenuItem key={`dropdown_prop_key_${p}`} value={i}>{p}</MenuItem>)
+            } */}
+            {
+              props.years.map((y: string) => <MenuItem key={`dp_year_key_${y}`} value={y}>{y}</MenuItem>)
             }
           </Select>
         </FormControl>
@@ -65,7 +74,7 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
         {subtitle}
       </Typography>
 
-      {renderFileDropdown()}
+      {renderVariableDropdown()}
       {renderProperties()}
       
     </Box>

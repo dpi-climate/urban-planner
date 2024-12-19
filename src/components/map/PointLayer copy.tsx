@@ -1,165 +1,115 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { ScatterplotLayer } from "@deck.gl/layers"
-import { MapboxOverlay } from "@deck.gl/mapbox"
-import chroma from "chroma-js"
-import { DataLoader } from "../../data-loader/DataLoader"
-import { throttle } from "lodash"
+import React, { useEffect, useMemo, useState } from "react";
+import { ScatterplotLayer, ScatterplotLayerProps } from "@deck.gl/layers";
+import { MapboxOverlay } from "@deck.gl/mapbox";
+import { DataLoader } from "../../data-loader/DataLoader";
+
+interface IBinaryData {
+  length: number;
+  attributes: {
+    getPosition: { value: Float32Array; size: number };
+    getFillColor: { value: Uint8Array; size: number };
+    // Removed getRadius to avoid conflict
+  };
+}
 
 interface IPointLayerProps {
-  map: mapboxgl.Map | null
-  layerProp: string | null
-  threshold: { value: number; color: string }[] | null
-  opacity: number
-  source: string | null
+  map: mapboxgl.Map | null;
+  layerProp: string | null;
+  threshold: { value: number; color: string }[] | null;
+  opacity: number;
+  source: string;
+  currentZoom: number; // Not needed in this approach
 }
 
 const PointLayer: React.FC<IPointLayerProps> = (props) => {
-  const [geojsonData, setGeojsonData] = useState<GeoJSON.FeatureCollection | null>(null)
-  const hasFetchedData = useRef(false)
-  const overlayRef = useRef<MapboxOverlay | null>(null)
+  const [binaryData, setBinaryData] = useState<IBinaryData | null>(null);
 
-  const fetchData = useCallback(() => {
+  // const radiusScale = useMemo(() => {
+  //   const baseScale = 1; // Adjust as needed
+  //   if (props.currentZoom <= 6) return baseScale;
+    
+  //   // const denominator = props.currentZoom <= 9 ? 4 : 2;
+  //   const denominator = 16
+  //   const zoomDifference = props.currentZoom - 6;
+  //   return baseScale * Math.pow(2, -zoomDifference / denominator);
+  // }, [props.currentZoom]);
+  
+
+  useEffect(() => {
+    if (!props.source) return;
+
+    let isMounted = true;
+
     (async () => {
-      if(props.source) {
-        const response = await DataLoader.getData(props.source)
-        if (response.data) setGeojsonData(response.data)
-          // hasFetchedData.current = false
+      try {
+        const response = await DataLoader.getData(props.source);
+        const data = response.data;
+
+        if (!isMounted || !data) return;
+
+        // Convert numeric arrays to typed arrays
+        const positions = new Float32Array(data.positions);
+        const colors = new Uint8Array(data.colors);
+
+        const binary: IBinaryData = {
+          length: data.length,
+          attributes: {
+            getPosition: { value: positions, size: 2 },
+            getFillColor: { value: colors, size: 4 },
+            // Removed getRadius
+          },
+        };
+
+        setBinaryData(binary);
+      } catch (err) {
+        console.error("Error fetching binary data:", err);
+        setBinaryData(null);
       }
-    })()
-  }, [props.source])
-
-  const interpolateColor = useCallback(
-    (value: number | null): [number, number, number, number] => {
-      if (value === null || value === undefined || !props.threshold) {
-        return [0, 0, 0, 0] // Transparent
-      }
-
-
-      let lower = props.threshold[0]
-      let upper = props.threshold[props.threshold.length - 1]
-
-      for (let i = 0; i < props.threshold.length - 1; i++) {
-        if (value >= props.threshold[i].value && value <= props.threshold[i + 1].value) {
-          lower = props.threshold[i]
-          upper = props.threshold[i + 1]
-          break
-        }
-      }
-
-      const t = (value - lower.value) / (upper.value - lower.value)
-      const color = chroma.mix(lower.color, upper.color, t).rgba()
-      return [color[0], color[1], color[2], 255]
-    },
-    [props.threshold]
-  )
-
-  const colorCache = useMemo(() => {
-    const cache: Record<number, [number, number, number, number]> = {}
-    geojsonData?.features.forEach((feature) => {
-      if (!feature.properties || !props.layerProp) return
-      const value = feature.properties[props.layerProp]
-      if (value !== null && value !== undefined && value !== 0) {
-        cache[value] = interpolateColor(value)
-      }
-    })
-    return cache
-  }, [geojsonData, props.layerProp, interpolateColor])
-
-  const getFillColor: (d: any) => [number, number, number, number] = (d) => {
-    if (!d.properties || !props.layerProp) return [0, 0, 0, 0]
-    const value = d.properties[props.layerProp]
-    if (value === null || value === undefined || value === 0) {
-      return [0, 0, 0, 0] // Transparent
-    }
-    const baseColor = colorCache[value] || [0, 0, 0, 0]
-    return [baseColor[0], baseColor[1], baseColor[2], props.opacity]
-  }
-
-  const throttledUpdate = useRef(
-    throttle((scatterplotLayer) => {
-      if (overlayRef.current) {
-        overlayRef.current.setProps({ layers: [scatterplotLayer] })
-      }
-    }, 100)
-  ).current
-
-  const updateLayer = useCallback(() => {
-    if (!props.map || !geojsonData || !props.threshold || !props.opacity) return
-
-    const scatterplotLayer = new ScatterplotLayer({
-      id: "scatterplot-layer",
-      data: geojsonData.features,
-      getPosition: (d: any) => d.geometry.coordinates,
-      getRadius: (d: any) => d.properties.radius || 500,
-      getFillColor,
-      updateTriggers: {
-        getFillColor: [props.opacity, props.layerProp],
-      },
-      pickable: true,
-      // onHover: ({ object, x, y }: any) => {
-      //   const tooltip = document.getElementById("tooltip")
-      //   if (object && tooltip && props.layerProp) {
-      //     const { properties } = object
-      //     const value = properties[props.layerProp]
-      //     tooltip.style.top = `${y}px`
-      //     tooltip.style.left = `${x}px`
-      //     tooltip.innerHTML = `Value: ${value}`
-      //     tooltip.style.display = "block"
-      //   } else if (tooltip) {
-      //     tooltip.style.display = "none"
-      //   }
-      // },
-      // onClick: ({ object }: any) => {
-      //   if (object) {
-      //     alert(`Clicked on: ${JSON.stringify(object.properties)}`)
-      //   }
-      // },
-    })
-
-    if (!overlayRef.current) {
-      overlayRef.current = new MapboxOverlay({
-        layers: [scatterplotLayer],
-      })
-      props.map.addControl(overlayRef.current as unknown as mapboxgl.IControl);
-    } else {
-      throttledUpdate(scatterplotLayer) // Update layer if already initialized
-    }
+    })();
 
     return () => {
-      if (overlayRef.current) {
-        overlayRef.current.finalize() // Proper cleanup
-        overlayRef.current = null
-      }
-    }
+      isMounted = false;
+    };
+  }, [props.source]);
 
-  },[props.map, geojsonData, props.layerProp, props.threshold, props.opacity, getFillColor])
+  const layers = useMemo(() => {
+    if (!binaryData) return [];
 
-  // useEffect(() => {
-  //   if (!hasFetchedData.current) {
-  //     fetchData()
-  //     hasFetchedData.current = true
-  //   }
-  // }, [fetchData])
+    return [
+      new ScatterplotLayer({
+        id: "scatterplot-layer",
+        data: binaryData,
+        // Corrected casting to ScatterplotLayerProps
+        getPosition: "getPosition" as unknown as ScatterplotLayerProps<any>["getPosition"],
+        getFillColor: "getFillColor" as unknown as ScatterplotLayerProps<any>["getFillColor"],
+        // Use getRadius function via deck.gl's properties
+        getRadius: 100, // Base radius (can be adjusted)
+        radiusScale: 1, // Overall scaling factor
+        radiusMinPixels: 1, // Minimum pixel radius
+        radiusMaxPixels: 100, // Maximum pixel radius
+        pickable: false,
+        // Optional: Enable auto highlighting on hover
+        // autoHighlight: true,
+        // Optional: Set blending mode if needed
+        // blending: 1,
+      }),
+    ];
+  }, [binaryData]);
 
-  useEffect(() => {if (props.source) fetchData() }, [props.source, fetchData])
-  useEffect(() => updateLayer(), [updateLayer])
+  useEffect(() => {
+    if (!props.map || layers.length === 0) return;
 
-  return (
-    <>
-      <div
-        id="tooltip"
-        style={{
-          display: "none",
-          position: "absolute",
-          padding: "8px",
-          background: "white",
-          boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.5)",
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      />
-    </>
-  )
-}
+    // Create the MapboxOverlay and add it as a control to the map
+    const overlay = new MapboxOverlay({ layers });
+    props.map.addControl(overlay as unknown as mapboxgl.IControl);
 
-export default PointLayer
+    return () => {
+      if (!props.map) return;
+      props.map.removeControl(overlay as unknown as mapboxgl.IControl);
+    };
+  }, [props.map, layers]);
+
+  return null;
+};
+
+export default PointLayer;

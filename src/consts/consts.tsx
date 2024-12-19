@@ -59,6 +59,8 @@ const myConsts = {
   }
 }
 
+export const CLIMATE_YEARS = Array.from({ length: 2023 - 1980 + 1 }, (_, i) => (1980 + i).toString())
+
 export const CLIMATE_VARIABLES = [
   { 
     name: "Min Temperature", 

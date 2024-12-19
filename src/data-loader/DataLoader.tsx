@@ -7,7 +7,7 @@ export abstract class DataLoader {
       // console.log("loaded")
 
       const url = `http://localhost:5000/geojson_data`
-      const data = { params: { var_name: fileName } }
+      const data = { params: { var_name: fileName, year: "1980" } }
       const response = await axios.get(url, data)
       console.log(fileName, "loaded")
       return response
