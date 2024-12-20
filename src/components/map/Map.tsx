@@ -1,7 +1,9 @@
 import "./Map.css"
-import React, { useRef, useState, useCallback, useEffect, SetStateAction, Dispatch } from "react"
+import React, { useRef, useState, useCallback, useEffect } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
+import useMapClick from "./useMapClick" // Import the custom hook
+
 import PointLayer from "./PointLayer"
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN as string
@@ -10,18 +12,21 @@ interface IMap {
   style: string
   center: [number, number]
   zoom: number
-  source: string | null
-  layerProp: string | null
-  threshold: {value: number, color: string}[] | null
-  // setClickedLocal: (lat:number, lng: number, elevation: number | null ) => void
-  setClickedLocal: Dispatch<SetStateAction<{ lat: number; lng: number; elevation: number | null; } | null>>
+  // source: string | null
+  variable: string
+  year: string
+  threshold: { value: number; color: string }[] | null
+  setClickedLocal: React.Dispatch<
+    React.SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>
+  >
+  clickedLocal: { lat: number; lng: number; elevation: number | null } | null
 
 }
 
 const Map: React.FC<IMap> = (props) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
-  const [map, setMap] = useState<mapboxgl.Map | null>(null) 
-  const [opacity, setOpacity] = useState<number>(255) 
+  const [map, setMap] = useState<mapboxgl.Map | null>(null)
+  const [currentZoom, setCurrentZoom] = useState<number>(props.zoom)
 
   const startMap = useCallback(() => {
     if (!mapContainerRef.current) return
@@ -30,69 +35,49 @@ const Map: React.FC<IMap> = (props) => {
       container: mapContainerRef.current,
       style: props.style,
       center: props.center,
-      zoom: props.zoom
+      zoom: props.zoom,
     })
 
-    // Once the map loads, set up terrain if you have a DEM source in your style
-    mapInstance.on('load', () => {
-      // If needed, add a DEM source and set the terrain:
-      mapInstance.addSource('my-terrain-source', {
-        "type": "raster-dem",
-        "url": "mapbox://mapbox.terrain-rgb",
-        "tileSize": 512,
-        "maxzoom": 14
-      });
-      mapInstance.setTerrain({ source: 'my-terrain-source' });
-    });
+    mapInstance.on("load", () => {
+      mapInstance.addSource("my-terrain-source", {
+        type: "raster-dem",
+        url: "mapbox://mapbox.terrain-rgb",
+        tileSize: 512,
+        maxzoom: 14,
+      })
+      mapInstance.setTerrain({ source: "my-terrain-source" })
+    })
+
+    mapInstance.on("zoom", () => {
+      setCurrentZoom(mapInstance.getZoom())
+    })
 
     setMap(mapInstance)
 
     return () => mapInstance.remove()
-
-  },[])
+  }, [])
 
   useEffect(() => startMap(), [startMap])
 
-  // Add a click event to get lat/lon and elevation
-  useEffect(() => {
-    if (!map) return
-
-    map.on('click', (e) => {
-      const { lng, lat } = e.lngLat
-
-      let elevation: number | null | undefined = null
-
-      // queryTerrainElevation returns elevation in meters if a terrain is set
-      if (map.queryTerrainElevation) {
-        elevation = map.queryTerrainElevation(e.lngLat) ?? null  // meters
-      }
-
-      props.setClickedLocal({lat, lng, elevation})
-
-      // console.log('Clicked location:', { lat, lng, elevation })
-    })
-
-    return () => {
-      if (map) {
-        map.off('click', () => {})
-      }
-    }
-  }, [map])
+  // Use the custom hook for click and marker handling
+  useMapClick({
+    map,
+    setClickedLocal: props.setClickedLocal,
+    clickedLocal: props.clickedLocal,
+  })
 
   const renderLayers = () => {
-    return (
-      <>
-        {/* <PointLayer
-          map={map}
-          layerProp={props.layerProp}
-          opacity={opacity}
-          threshold={props.threshold}
-          source={props.source}
-        /> */}
-      </>
-    )
+    return <>
+    <PointLayer
+      map={map}
+      variable={props.variable}
+      year={props.year}
+      opacity={1}
+      zoom={currentZoom}
+    />
+    </>
   }
-  
+
   return (
     <div className="map-container" ref={mapContainerRef}>
       {map && renderLayers()}
