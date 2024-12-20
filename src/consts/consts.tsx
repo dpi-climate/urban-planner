@@ -65,9 +65,6 @@ export const CLIMATE_VARIABLES = [
   { 
     name: "Min Temperature", 
     id: "tmin", 
-    // geoFile: "Yearly_tmin.json", 
-    geoFile: "tmin", 
-    properties: Array.from({ length: 2023 - 1980 + 1 }, (_, i) => (1980 + i).toString()),
     threshold: [
       { value: -30   , color: "#FFFFFF"},
       { value: -28, color: "#E0F3DB"},
@@ -96,8 +93,6 @@ export const CLIMATE_VARIABLES = [
   { name: 
     "Max Temperature", 
     id: "tmax", 
-    geoFile: "tmax", 
-    properties: Array.from({ length: 2023 - 1980 + 1 }, (_, i) => (1980 + i).toString()),
     threshold: [
       { value: 0   , color: "#FFFFFF"},
       { value: 14, color: "#E0F3DB"},
@@ -126,8 +121,6 @@ export const CLIMATE_VARIABLES = [
   { 
     name: "Total Precipitation", 
     id: "prcp", 
-    geoFile: "prcp", 
-    properties: Array.from({ length: 2023 - 1980 + 1 }, (_, i) => (1980 + i).toString()),
     threshold: [
       { value: 0.0, color: '#FFFFFF'},
       { value: 12.7, color: '#E0F3DB'},

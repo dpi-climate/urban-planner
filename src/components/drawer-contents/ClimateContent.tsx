@@ -7,9 +7,6 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import LoadingButton from '@mui/lab/LoadingButton'
-import UploadIcon from '@mui/icons-material/Upload'
-import Stack from '@mui/material/Stack'
 
 import { DrawerWrapperContentProps } from '../../types-and-interfaces/interfaces'
 
@@ -21,17 +18,14 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
   const renderVariableDropdown = () => {
     return (
       <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-        <InputLabel>Source</InputLabel>
+        <InputLabel>Variable</InputLabel>
         <Select
-          // value={`${props.griddedLayerIdx}`}
-          // label={props.sources[props.griddedLayerIdx].name}
-          // onChange={(event: SelectChangeEvent) => props.updateSource(parseInt(event.target.value))}
-          value={props.currentLayer.varId}
-          label={props.sources[props.griddedLayerIdx].name}
-          onChange={(event: SelectChangeEvent) => props.updateLayer(props.sources[parseInt(event.target.value)].id, null)}
+          value={`${props.variableIdx}`}
+          label={props.variables[props.variableIdx].name}
+          onChange={(event: SelectChangeEvent) => props.updateLayer(parseInt(event.target.value), null)}
         >
           {
-            props.sources.map((obj: {name: string, id: string, properties: string[]}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
+            props.variables.map((obj: {name: string, id: string}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
           }
         </Select>
       </FormControl>
@@ -39,24 +33,21 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
   }
 
   const renderProperties = () => {
-    // console.log(props.sources, props.griddedLayerIdx, props.activePropIdx, props.sources && props.griddedLayerIdx && props.activePropIdx)
-    if(props.sources && props.activePropIdx !== null) {
+    // console.log(props.variables, props.variableIdx, props.yearIdx, props.variables && props.variableIdx && props.yearIdx)
+    if(props.variables && props.yearIdx !== null) {
       return (
         <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
           <InputLabel>Colors</InputLabel>
           <Select
-            value={props.activePropIdx.toString()}
-            // label={props.sources[props.griddedLayerIdx].properties[props.activePropIdx]}
-            // onChange={(event: SelectChangeEvent) => props.updateProp(parseInt(event.target.value))}
-            value={props.currentLayer.year}
-            label={props.currentLayer.year}
-            onChange={(event: SelectChangeEvent) => props.updateLayer(null, event.target.value)}
+            value={`${props.yearIdx}`}
+            label={props.years[props.yearIdx]}
+            onChange={(event: SelectChangeEvent) => props.updateLayer(null, parseInt(event.target.value))}
           >
             {/* {
-              props.sources[props.griddedLayerIdx].properties.map((p: string, i: number) => <MenuItem key={`dropdown_prop_key_${p}`} value={i}>{p}</MenuItem>)
+              props.variables[props.variableIdx].properties.map((p: string, i: number) => <MenuItem key={`dropdown_prop_key_${p}`} value={i}>{p}</MenuItem>)
             } */}
             {
-              props.years.map((y: string) => <MenuItem key={`dp_year_key_${y}`} value={y}>{y}</MenuItem>)
+              props.years.map((y: string, idx: number) => <MenuItem key={`dp_year_key_${idx}`} value={idx}>{y}</MenuItem>)
             }
           </Select>
         </FormControl>

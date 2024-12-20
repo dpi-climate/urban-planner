@@ -15,70 +15,34 @@ const Home = () => {
   // /////////////////////////////////////////////////////////////////////////////////
   // ////////////////   CLIMATE CONTENT   ////////////////////////////////////////////
   const initialIdx = 0
-  const [griddedLayerIdx, setGriddedLayerIdx] = useState<number>(initialIdx)
-  const [activeSource, setSource]             = useState<string | null>(CLIMATE_VARIABLES[initialIdx].geoFile)
-  const [gridLayerProps, setGridLayerProps]   = useState<string[] | null>(CLIMATE_VARIABLES[initialIdx].properties)
-  // const [activeProp, setProp]                 = useState<string | null>(CLIMATE_VARIABLES[initialIdx].properties[0])
-  const [activePropIdx, setPropIdx]           = useState<number>(initialIdx)
+  
+  const variablesList = CLIMATE_VARIABLES.map(({ threshold, ...rest }) => rest)
+  
+  const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
+  const [variableIdx, setVariableIdx]   = useState<number>(initialIdx)
+  
   const [threshold, setThreshold]             = useState<{value: number, color: string}[] | null>(CLIMATE_VARIABLES[initialIdx].threshold)
 
-  const [currentSource, setCurrentSource] = useState<{
-    source: string | null,
-    layerProp: string[] | null,
-    threshold: {value: number, color: string}[] | null
-  
-  }>({
-    // source: CLIMATE_VARIABLES[initialIdx].geoFile,
-    source: CLIMATE_VARIABLES[initialIdx].id,
-    layerProp: CLIMATE_VARIABLES[initialIdx].properties,
-    threshold: CLIMATE_VARIABLES[initialIdx].threshold,
-  });
-
-  ////////////   ////////////////   /////////////
-
-    ////////////   ////////////////   /////////////
-  
-  // /////////////////////////////////////////////////////////////////////////////////
-  // ////////////////   DRAWER   /////////////////////////////////////////////////////
   
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
   const drawerBtns = ["Layers"]
   // const drawerBtns = ["Layers", "Home"]
   const infoDrawerBtns = ["Close"]
 
-  // /////////////////////////////////////////////////////////////////////////////////
-  // ////////////////   MAP   ////////////////////////////////////////////////////////
   const [clickedLocal, setClickedLocal] = useState<{lat:number, lng: number, elevation: number | null} | null>(null)
-  const [currentLayer, setCurrentLayer] = useState<{varId: string, year: string}>({varId: CLIMATE_VARIABLES[initialIdx].id, year: CLIMATE_YEARS[initialIdx]})
-  // /////////////////////////////////////////////////////////////////////////////////
+  
   // ////////////////   UPDATE FUNCTIONS   ///////////////////////////////////////////
 
-  const updateLayer = (varId: string | null = null, year: string | null = null) => {
-    const newLayer = { ...currentLayer }
 
-    if(varId !== null) newLayer.varId = varId
-    if(year !== null) newLayer.year = year
+  const updateLayer = (varIdx: number | null, yIdx: number | null) => {
+    if(varIdx !== null) {
+      setVariableIdx(varIdx)
+    }
 
-    setCurrentLayer(newLayer)
+    if(yIdx !== null) {
+      setYearIdx(yIdx)
+    }
   }
-  
-  const updateSource = (idx: number, yearIdx:number=0) => {
-    setGriddedLayerIdx(idx)
-    setGridLayerProps(CLIMATE_VARIABLES[idx].properties)
-    setPropIdx(yearIdx)
-    // setSource(CLIMATE_VARIABLES[idx].geoFile)
-    setSource(CLIMATE_VARIABLES[idx].id)
-    setThreshold(CLIMATE_VARIABLES[idx].threshold)
-    setCurrentSource({
-      // source: CLIMATE_VARIABLES[idx].geoFile,
-      source: CLIMATE_VARIABLES[idx].id,
-      layerProp: CLIMATE_VARIABLES[idx].properties,
-      threshold: CLIMATE_VARIABLES[idx].threshold,
-    })
-  }
-
-  // const updateProp = (prop: string, idx: number) => {setProp(prop); setPropIdx(idx)}
-  const updateProp = (propIdx: number) => setPropIdx(propIdx)
 
   // /////////////////////////////////////////////////////////////////////////////////
   // ////////////////   RENDER FUNCTIONS   ///////////////////////////////////////////
@@ -88,15 +52,11 @@ const Home = () => {
       <DrawerWrapper anchor={"right"} buttons={drawerBtns} setBtn={setDrawerBtn}>
         {activeDrawerBtn === 'Layers' && 
           <ClimateContent 
-            griddedLayerIdx={griddedLayerIdx} 
-            sources={CLIMATE_VARIABLES} 
+            variableIdx={variableIdx} 
+            variables={variablesList} 
+            yearIdx={yearIdx}
             years={CLIMATE_YEARS}
-            properties={gridLayerProps} 
-            activePropIdx={activePropIdx}
-            updateSource={updateSource}
-            updateProp={updateProp}
             updateLayer={updateLayer}
-            currentLayer={currentLayer}
             />}
             
       </DrawerWrapper>
@@ -112,13 +72,11 @@ const Home = () => {
           style="mapbox://styles/carolvfs/clxnzay8z02qh01qkhftqheen" 
           center={[-89.12987909766366, 40.09236099826568] as [number, number]}
           zoom={6}
-          source={activeSource}
-          layerProp={CLIMATE_VARIABLES[griddedLayerIdx].properties[activePropIdx]}
+          variable={variablesList[variableIdx].id}
+          year={CLIMATE_YEARS[yearIdx]}
           threshold={threshold}
-          currentSource={currentSource}
           clickedLocal={clickedLocal}
           setClickedLocal={setClickedLocal}
-          currentLayer={currentLayer}
         />
       </ElementWrapper>
     )

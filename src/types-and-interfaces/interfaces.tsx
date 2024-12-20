@@ -11,13 +11,11 @@ export interface DrawerWrapperProps {
 }
 
 export interface DrawerWrapperContentProps {
-  updateLayer: (varId: string | null, year: string | null) => void
-  updateSource: (idx: number) => void
-  updateProp: (propIdx: number) => void
-  griddedLayerIdx: number
-  properties: string[] | null
-  activePropIdx: number | null
-  sources: {name: string, id: string, geoFile: string, properties: string[]}[]
+  updateLayer: (varIdx: number | null, yIdx: number | null) => void
+  variableIdx: number
+  years: string[]
+  yearIdx: number
+  variables: {name: string, id: string}[]
 }
 
 export interface InfoContentProps {
