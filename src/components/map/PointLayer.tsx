@@ -9,6 +9,8 @@ interface IBinaryData {
     getPosition: { value: Float32Array, size: number }
     getFillColor: { value: Uint8Array, size: number }
   }
+  ids: Array<number | string>
+  values: Array<number | string>
 }
 
 interface IPointLayerProps {
@@ -17,6 +19,7 @@ interface IPointLayerProps {
   variable: string
   year: string
   zoom: number
+  updateRiskData: (ptIdx: number) => void
 }
 
 const PointLayer: React.FC<IPointLayerProps> = (props) => {
@@ -60,8 +63,9 @@ const PointLayer: React.FC<IPointLayerProps> = (props) => {
           attributes: {
             getPosition: { value: positions, size: 2 },
             getFillColor: { value: colors, size: 4 },
-            // Removed getRadius
           },
+          ids: data.ids,
+          values: data.values,
         }
 
         setBinaryData(binary)
@@ -81,23 +85,28 @@ const PointLayer: React.FC<IPointLayerProps> = (props) => {
     
     return [
       new ScatterplotLayer({
-        id: "scatterplot-layer",
+        id: `scatterplot-layer-${props.variable}-${props.year}`,
         data: binaryData,
-        // Corrected casting to ScatterplotLayerProps
+
         getPosition: "getPosition" as unknown as ScatterplotLayerProps<any>["getPosition"],
         getFillColor: "getFillColor" as unknown as ScatterplotLayerProps<any>["getFillColor"],
-        // Use getRadius function via deck.gl's properties
-        getRadius: 500, // Base radius (can be adjusted)
-        radiusScale: radiusScale, // Overall scaling factor
-        radiusMinPixels: 1, // Minimum pixel radius
-        radiusMaxPixels: 500, // Maximum pixel radius
+
+        getRadius: 500, // Base radius
+        radiusScale: radiusScale, 
+        radiusMinPixels: 1, 
+        radiusMaxPixels: 500,
         opacity: props.opacity, // Layer opacity (0 to 1)
-        pickable: false,
-        // Optional: Enable auto highlighting on hover
-        // autoHighlight: true,
-        // Optional: Set blending mode if needed
-        // blending: 1,
-      }),
+
+        pickable: true,
+        onClick: (info) => {
+          if (props.variable == "prcp" && info.index !== undefined && binaryData) {
+            const id = binaryData.ids[info.index] as number
+            const value = binaryData.values[info.index]
+            // alert(`Value: ${value} Id: ${id}`);
+            props.updateRiskData(id)
+          }
+        },
+      })
     ]
   }, [binaryData, props.opacity, radiusScale])
 

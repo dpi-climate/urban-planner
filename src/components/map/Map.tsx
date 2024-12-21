@@ -20,6 +20,7 @@ interface IMap {
     React.SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>
   >
   clickedLocal: { lat: number; lng: number; elevation: number | null } | null
+  updateRiskData: (ptIdx: number) => void
 
 }
 
@@ -59,7 +60,6 @@ const Map: React.FC<IMap> = (props) => {
 
   useEffect(() => startMap(), [startMap])
 
-  // Use the custom hook for click and marker handling
   useMapClick({
     map,
     setClickedLocal: props.setClickedLocal,
@@ -74,6 +74,7 @@ const Map: React.FC<IMap> = (props) => {
       year={props.year}
       opacity={1}
       zoom={currentZoom}
+      updateRiskData={props.updateRiskData}
     />
     </>
   }

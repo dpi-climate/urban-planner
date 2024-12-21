@@ -1,3 +1,5 @@
+export const serverUrl = "http://localhost:5000"
+
 const myConsts = {
   elements: [
     {
@@ -158,10 +160,21 @@ export const BAR_CHART_DATA = Array.from({ length: 120 }, (_, i) => ({
   value: Math.floor(Math.random() * 100) + 1, // Random value between 1 and 100
 }));
 
+// export const LINE_CHART_DATA = [
+//     { date: new Date(2023, 0, 1), value: 30 },
+//     { date: new Date(2023, 1, 1), value: 50 },
+//     { date: new Date(2023, 2, 1), value: 80 },
+// ]
+
 export const LINE_CHART_DATA = [
-    { date: new Date(2023, 0, 1), value: 30 },
-    { date: new Date(2023, 1, 1), value: 50 },
-    { date: new Date(2023, 2, 1), value: 80 },
+  {year: 'risk_2yr (', value: 52.27}, 
+  {year: 'risk_5yr (', value: 13.64}, 
+  {year: 'risk_10yr', value: 9.09}, 
+  {year: 'risk_25yr', value: 2.27}, 
+  {year: 'risk_50yr', value: 0.0}, 
+  {year: 'risk_100yr', value: 0.0}, 
+  {year: 'risk_200yr', value: 0.0}, 
+  {year: 'risk_500yr', value: 0.0}
 ]
 
 // export default myConsts

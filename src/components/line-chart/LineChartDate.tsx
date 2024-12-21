@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react"
 import * as d3 from "d3"
 
 type DataPoint = {
-  year: string
+  date: Date
   value: number
 }
 
@@ -28,10 +28,9 @@ const LineChart: React.FC<LineChartProps> = ({ data, width, height }) => {
 
     // Create scales
     const xScale = d3
-      .scalePoint()
-      .domain(data.map((d) => d.year))
+      .scaleTime()
+      .domain(d3.extent(data, (d) => d.date) as [Date, Date])
       .range([0, chartWidth])
-      .padding(0.5)
 
     const yScale = d3
       .scaleLinear()
@@ -41,11 +40,11 @@ const LineChart: React.FC<LineChartProps> = ({ data, width, height }) => {
     // Create line generator
     const line = d3
       .line<DataPoint>()
-      .x((d) => xScale(d.year) || 0)
+      .x((d) => xScale(d.date))
       .y((d) => yScale(d.value))
       .curve(d3.curveMonotoneX)
 
-
+    // Append group element for chart content
     const g = svg
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
@@ -53,7 +52,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, width, height }) => {
     // Add X axis
     g.append("g")
       .attr("transform", `translate(0,${chartHeight})`)
-      .call(d3.axisBottom(xScale))
+      .call(d3.axisBottom(xScale).ticks(6))
 
     // Add Y axis
     g.append("g").call(d3.axisLeft(yScale))

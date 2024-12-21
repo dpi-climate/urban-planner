@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react"
-import { Anchor } from "./types"
+import { Anchor, RiskDataType } from "./types"
 
 export interface DrawerWrapperProps {
   anchor: Anchor
@@ -20,4 +20,5 @@ export interface DrawerWrapperContentProps {
 
 export interface InfoContentProps {
   clickedLocal: {lat:number, lng: number, elevation: number | null} | null
+  riskData: RiskDataType
 }

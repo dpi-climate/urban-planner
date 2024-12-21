@@ -9,6 +9,7 @@ import ClimateContent from "../../components/drawer-contents/ClimateContent"
 import ClickedInfoContent from "../../components/drawer-contents/ClickedInfoContent"
 
 import { CLIMATE_VARIABLES, CLIMATE_YEARS } from "../../consts/consts"
+import { DataLoader } from "../../data-loader/DataLoader"
 
 const Home = () => {
  
@@ -23,6 +24,7 @@ const Home = () => {
   
   const [threshold, setThreshold]             = useState<{value: number, color: string}[] | null>(CLIMATE_VARIABLES[initialIdx].threshold)
 
+  const [riskData, setRiskData] = useState<{ year: string, value: number}[]>([])
   
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
   const drawerBtns = ["Layers"]
@@ -35,13 +37,13 @@ const Home = () => {
 
 
   const updateLayer = (varIdx: number | null, yIdx: number | null) => {
-    if(varIdx !== null) {
-      setVariableIdx(varIdx)
-    }
+    if(varIdx !== null) setVariableIdx(varIdx)
+    if(yIdx !== null) setYearIdx(yIdx)
+  }
 
-    if(yIdx !== null) {
-      setYearIdx(yIdx)
-    }
+  const updateRiskData = async (ptIdx: number) => {
+    const _riskData = await DataLoader.getRiskData(ptIdx)
+    setRiskData(_riskData)
   }
 
   // /////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +79,7 @@ const Home = () => {
           threshold={threshold}
           clickedLocal={clickedLocal}
           setClickedLocal={setClickedLocal}
+          updateRiskData={updateRiskData}
         />
       </ElementWrapper>
     )
@@ -91,6 +94,7 @@ const Home = () => {
         
         <ClickedInfoContent 
           clickedLocal={clickedLocal}
+          riskData={riskData}
         />
       </DrawerWrapper>
     )

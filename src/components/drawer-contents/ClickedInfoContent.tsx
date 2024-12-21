@@ -28,16 +28,20 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
             }}
           />
           <Box>
-            <Typography variant="body2"><strong>Elevation:</strong> {props.clickedLocal.elevation.toFixed(2)} m</Typography>
+            <Typography variant="body2"><strong>Elevation:</strong> {props.clickedLocal.elevation?.toFixed(2)} m</Typography>
             <Typography variant="body2"><strong>Latitude:</strong> {props.clickedLocal.lat.toFixed(2)}°</Typography>
             <Typography variant="body2"><strong>Longitude:</strong> {props.clickedLocal.lng.toFixed(2)}°</Typography>
           </Box>
-          <Box>
+          {/* <Box>
             <BarChart data={BAR_CHART_DATA} width={400} height={200} />
           </Box>
           <Box>
           <BarChart data={BAR_CHART_DATA} width={400} height={200} />
-          </Box>
+          </Box> */}
+          {/* <Box>
+            <LineChart data={LINE_CHART_DATA} width={400} height={200} />
+          </Box> */}
+          { renderLineChart() }
           </>
       )
     } else {
@@ -50,7 +54,15 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
   }
 
   const renderLineChart = () => {
-    return "line chart"
+    if(props.riskData.length > 0) {
+      return (
+        <Box>
+          <LineChart data={props.riskData} width={400} height={200} />
+        </Box>
+      )
+    } else {
+      return <></>
+    }
   }
 
   return (
