@@ -65,6 +65,7 @@ const Map: React.FC<IMap> = (props) => {
   useMapClick({
     map,
     clickedLocal: props.clickedLocal,
+    variable: props.variable,
     setClickedLocal: props.setClickedLocal,
     updateRiskData: props.updateRiskData
   })

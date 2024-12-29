@@ -7,6 +7,7 @@ import DrawerWrapper from "../../components/drawer-wrapper/DrawerWrapper"
 
 import ClimateContent from "../../components/drawer-contents/ClimateContent"
 import ClickedInfoContent from "../../components/drawer-contents/ClickedInfoContent"
+import EVContent from "../../components/drawer-contents/EVContent"
 
 import { CLIMATE_VARIABLES, CLIMATE_YEARS } from "../../consts/consts"
 import { DataLoader } from "../../data-loader/DataLoader"
@@ -27,12 +28,13 @@ const Home = () => {
   const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
   const [variableIdx, setVariableIdx]   = useState<number>(initialIdx)
   const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(initialIdx)
+  // const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(1)
   
 
   const [riskData, setRiskData] = useState<{ year: string, value: number}[]>([])
   
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
-  const drawerBtns = ["Layers"]
+  const drawerBtns = ["Layers", "EV-Stations"]
   // const drawerBtns = ["Layers", "Home"]
   const infoDrawerBtns = ["Close"]
 
@@ -43,7 +45,18 @@ const Home = () => {
 
 
   const updateLayer = (varIdx: number | null, yIdx: number | null, sIdx: number | null) => {
-    if(varIdx !== null) setVariableIdx(varIdx)
+    
+    
+    if(varIdx !== null) {
+      setVariableIdx(varIdx)
+
+      if(variablesList[varIdx].id !== "prcp") {
+        setClickedLocal(null)
+        setRiskData([])
+      }
+    
+    }
+
     if(yIdx !== null)   setYearIdx(yIdx)
     if(sIdx !== null)   setSpatialAggIdx(sIdx)
 
@@ -71,6 +84,10 @@ const Home = () => {
             spatialAggList={spatialAggList}
             updateLayer={updateLayer}
             />}
+          {activeDrawerBtn === 'EV-Stations' && 
+          <EVContent 
+            
+            />}
             
       </DrawerWrapper>
     )
@@ -78,8 +95,9 @@ const Home = () => {
 
   const renderMap = () => {
     return (
-      // <ElementWrapper width='1850px' height='800px' right='0px'>
       // <ElementWrapper width='1850px' height='800px' right='-100px'>
+      // <ElementWrapper height='95vh'>
+      // <ElementWrapper width='1850px' height='800px' right='0px'>
       <ElementWrapper height='95vh'>
         <Map 
           style="mapbox://styles/carolvfs/clxnzay8z02qh01qkhftqheen" 
@@ -120,15 +138,26 @@ const Home = () => {
     )
   }
 
+  const renderLogos = () => {
+    return (
+      <div className="logo-container">
+        <img className="climate-logo" src="/new-climate-logo-background.png" alt="climate-logo"/>
+        <img className="cleets-logo" src="/cleets-logo.png" alt="cleets-logo" />
+      </div>
+    )
+  }
+
   const render = () => {
     return (
       <div className="home">
         { renderMenu() }
         { renderMap() }
         {renderInfoDrawer()}
+        {renderLogos()}
       </div>
     )
   }
+
   return render()
 }
 

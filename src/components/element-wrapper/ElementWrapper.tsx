@@ -5,6 +5,8 @@ const ElementWrapper = (props: any) => {
     <div style={{
       position: 'relative',
       right: props.right,
+      top: props.top,
+      bottom: props.bottom,
       display: 'flex',
       flexDirection: 'column',
       width: props.width,

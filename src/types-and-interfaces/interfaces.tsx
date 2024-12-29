@@ -11,7 +11,7 @@ export interface DrawerWrapperProps {
 }
 
 export interface DrawerWrapperContentProps {
-  updateLayer: (varIdx: number | null, yIdx: number | null) => void
+  updateLayer: (varIdx: number | null, yIdx: number | null, sIdx: number | null ) => void
   variableIdx: number
   years: string[]
   yearIdx: number

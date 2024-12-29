@@ -14,6 +14,7 @@ interface ClickedLocation {
 interface UseMapClickProps {
   map: mapboxgl.Map | null
   clickedLocal: ClickedLocation | null
+  variable: string
   setClickedLocal: React.Dispatch<React.SetStateAction<ClickedLocation | null>>
   updateRiskData: (ptIdx: number | [number, number], elevation: number | null) => void
 }
@@ -26,6 +27,7 @@ const useMapClick = (props: UseMapClickProps) => {
     if (!map) return
 
     const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
+      if(props.variable === "prcp") {
       const { lng, lat } = e.lngLat
 
       let elevation: number | null | undefined = null
@@ -33,21 +35,22 @@ const useMapClick = (props: UseMapClickProps) => {
         elevation = map.queryTerrainElevation(e.lngLat) ?? null
       }
 
-      setClickedLocal({ lat, lng, elevation })
-      props.updateRiskData([lat, lng], elevation)
+        setClickedLocal({ lat, lng, elevation })
+        props.updateRiskData([lat, lng], elevation)
+        
+        if (!marker) {
+          const newMarker = new mapboxgl.Marker({
+            // element: createCustomMarker(), // Use a custom element
+            element: createEvStationIcon(),
+          })
+            .setLngLat([lng, lat])
+            .addTo(map)
 
-      if (!marker) {
-        const newMarker = new mapboxgl.Marker({
-          // element: createCustomMarker(), // Use a custom element
-          element: createEvStationIcon(),
-        })
-          .setLngLat([lng, lat])
-          .addTo(map)
-
-        setMarker(newMarker)
-      } else {
-        // Update the existing marker's position
-        marker.setLngLat([lng, lat])
+            setMarker(newMarker)
+        } else {
+          // Update the existing marker's position
+          marker.setLngLat([lng, lat])
+        }
       }
     }
 
@@ -56,10 +59,9 @@ const useMapClick = (props: UseMapClickProps) => {
     return () => {
       map.off("click", handleMapClick)
     }
-  }, [map, marker, setClickedLocal])
+  }, [map, props.variable, marker, setClickedLocal])
 
   const cleanUpMarker = useCallback(() => {
-    console.log(clickedLocal)
     if (clickedLocal === null && marker) {
       marker.remove()
       setMarker(null)

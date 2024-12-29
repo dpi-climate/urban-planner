@@ -3,3 +3,27 @@
     height:100%;
     width:100%;
 }
+
+.logo-container {
+  position: fixed; /* keeps container in one place while scrolling */
+  top: 0;
+  left: 0;
+  z-index: 9999; /* ensures the container is on top of other elements */
+
+  display: flex; /* places images in a row */
+  align-items: center; /* vertically center the images if they vary in height */
+  gap: 1rem; /* optional space between images */
+  margin: 1rem; /* optional margin to keep them off the screen edges */
+}
+
+.climate-logo {
+  width: 150px;  /* or any other desired size */
+  height: auto; /* maintains aspect ratio */
+
+}
+
+.cleets-logo {
+  width: 60px;  /* or any other desired size */
+  height: auto; /* maintains aspect ratio */
+
+}
