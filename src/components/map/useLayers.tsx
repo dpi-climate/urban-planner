@@ -39,16 +39,15 @@ export default function useLayers({
 
   // --- Example fetch for the point data ---
   useEffect(() => {
+    console.log("point useeffect", variable, year, spatialLevel)
     if (!variable || !year || spatialLevel !== "") return
 
     let isMounted = true;
     (async () => {
       try {
-        const response = await DataLoader.getPointLayerData(variable, year)
+        const data = await DataLoader.getPointLayerData(variable, year, spatialLevel)
         if (!isMounted) return
-        console.log("mouted")
-        setPointData(response.data)
-        console.log("set")
+        setPointData(data)
       } catch (error) {
         console.error("Error fetching point data:", error)
         if (isMounted) setPointData(null)
@@ -62,19 +61,32 @@ export default function useLayers({
 
   // --- Example fetch for the polygon data ---
   useEffect(() => {
-    if (!variable || !year || spatialLevel !== "ct") return
+    if (!variable || !year || spatialLevel === null) return
 
     let isMounted = true;
     (async () => {
       try {
-        const response = await DataLoader.getPolygonLayerData(variable, year, spatialLevel)
+        const data = await DataLoader.getPointLayerData(variable, year, spatialLevel)
         if (!isMounted) return
-        console.log("mouted")
-        setPolygonData(response.data)
-        console.log("set")
+
+        if (spatialLevel === "") {
+          setPointData(data)
+
+        } else if (spatialLevel === "ct") {
+          setPolygonData(data)
+        }
+
+
       } catch (error) {
         console.error("Error fetching polygon data:", error)
-        if (isMounted) setPolygonData(null)
+        if (isMounted) {
+          if (spatialLevel === "") {
+            setPointData(null)
+  
+          } else if (spatialLevel === "ct") {
+            setPolygonData(null)
+          }
+        }
       }
     })()
 
@@ -121,8 +133,7 @@ export default function useLayers({
   // Create the polygon layer
   const polygonLayer = useMemo(() => {
     if (!polygonData) return null
-
-    // Convert the raw data into a GeoJSON feature collection
+    console.log(polygonData)
     const geojson = {
       type: "FeatureCollection",
       features: polygonData.tracts.map((tract) => ({
