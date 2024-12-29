@@ -1,13 +1,15 @@
 import "./Map.css"
-
 import React, { useRef, useState, useCallback, useEffect } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
+import useMapClick from "./useMapClick" // Import the custom hook
+import { Row, Col, Form, Dropdown, Button } from 'react-bootstrap'
 
-import useMapClick from "./useMapClick"
-import SingleDeckOverlay from "./SingleDeckOverlay"
-import useLayers from "./useLayers"
+import PointLayer from "./PointLayer"
+import PolygonLayerComponent from "./PolygonLayer"
 
+import ColorBar from "./ColorBar"
+import ColorBarWrapper from "./ColorBarWrapper"
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN as string
 
@@ -15,9 +17,10 @@ interface IMap {
   style: string
   center: [number, number]
   zoom: number
+  // source: string | null
   variable: string
   year: string
-  spatialLevel: any
+  // threshold: { value: number; color: string }[] | null
   setClickedLocal: React.Dispatch<
     React.SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>
   >
@@ -69,16 +72,43 @@ const Map: React.FC<IMap> = (props) => {
     updateRiskData: props.updateRiskData
   })
 
-  const deckLayers = useLayers({
-    variable: props.variable,
-    year: props.year,
-    spatialLevel: props.spatialLevel,
-    zoom: currentZoom,
-  })
+  const renderLayers = () => {
+    console.log(props.spatialLevel)
+    if(props.spatialLevel === "") {
+      return <>
+      <PointLayer
+        map={map}
+        variable={props.variable}
+        year={props.year}
+        opacity={1}
+        zoom={currentZoom}
+        // updateRiskData={props.updateRiskData}
+      />
+      </>
+    }
+  }
+
+  const renderPolygonLayer = () => {
+    console.log(props.spatialLevel)
+    if(props.spatialLevel === "ct") {
+      return (
+        <PolygonLayerComponent
+        map={map}
+        variable={props.variable}
+        year={props.year}
+        opacity={1}
+        zoom={currentZoom}
+        spatialLevel={props.spatialLevel}
+  
+      />
+      )
+    }
+  }
 
   return (
     <div className="map-container" ref={mapContainerRef}>
-      {map && <SingleDeckOverlay map={map} layers={deckLayers} />}
+      {map && renderLayers()}
+      {map && renderPolygonLayer()}
     </div>
   )
 }

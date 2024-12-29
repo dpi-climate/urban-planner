@@ -1,84 +1,73 @@
-import "./useMapClick.css";
-import { useCallback, useEffect, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import "./useMapClick.css"
+import { useCallback, useEffect, useState } from "react"
+import mapboxgl from "mapbox-gl"
+import "mapbox-gl/dist/mapbox-gl.css"
+import createEvStationIcon from "../../utils/EvStationIcon"
+import { update } from "lodash"
 
 interface ClickedLocation {
-  lat: number;
-  lng: number;
-  elevation: number | null;
+  lat: number
+  lng: number
+  elevation: number | null
 }
 
 interface UseMapClickProps {
-  map: mapboxgl.Map | null;
-  setClickedLocal: React.Dispatch<React.SetStateAction<ClickedLocation | null>>;
-  clickedLocal: ClickedLocation | null;
+  map: mapboxgl.Map | null
+  clickedLocal: ClickedLocation | null
+  setClickedLocal: React.Dispatch<React.SetStateAction<ClickedLocation | null>>
+  updateRiskData: (ptIdx: number | [number, number], elevation: number | null) => void
 }
 
 const useMapClick = (props: UseMapClickProps) => {
-  const { map, setClickedLocal, clickedLocal } = props;
-  const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
+  const { map, setClickedLocal, clickedLocal } = props
+  const [marker, setMarker] = useState<mapboxgl.Marker | null>(null)
 
   const addClickEvent = useCallback(() => {
-    if (!map) return;
+    if (!map) return
 
     const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
-      const { lng, lat } = e.lngLat;
+      const { lng, lat } = e.lngLat
 
-      let elevation: number | null | undefined = null;
+      let elevation: number | null | undefined = null
       if (map.queryTerrainElevation) {
-        elevation = map.queryTerrainElevation(e.lngLat) ?? null;
+        elevation = map.queryTerrainElevation(e.lngLat) ?? null
       }
 
-      setClickedLocal({ lat, lng, elevation });
+      setClickedLocal({ lat, lng, elevation })
+      props.updateRiskData([lat, lng], elevation)
 
       if (!marker) {
-        // Create the marker if it doesn't already exist
         const newMarker = new mapboxgl.Marker({
-          element: createCustomMarker(), // Use a custom element
+          // element: createCustomMarker(), // Use a custom element
+          element: createEvStationIcon(),
         })
           .setLngLat([lng, lat])
-          .addTo(map);
+          .addTo(map)
 
-        setMarker(newMarker);
+        setMarker(newMarker)
       } else {
         // Update the existing marker's position
-        marker.setLngLat([lng, lat]);
+        marker.setLngLat([lng, lat])
       }
-    };
+    }
 
-    map.on("click", handleMapClick);
+    map.on("click", handleMapClick)
 
     return () => {
-      map.off("click", handleMapClick);
-    };
-  }, [map, marker, setClickedLocal]);
+      map.off("click", handleMapClick)
+    }
+  }, [map, marker, setClickedLocal])
 
   const cleanUpMarker = useCallback(() => {
+    console.log(clickedLocal)
     if (clickedLocal === null && marker) {
-      marker.remove();
-      setMarker(null);
+      marker.remove()
+      setMarker(null)
     }
-  }, [clickedLocal, marker]);
+  }, [clickedLocal, marker])
 
-  useEffect(() => addClickEvent(), [addClickEvent]);
-  useEffect(() => cleanUpMarker(), [cleanUpMarker]);
-};
-
-export default useMapClick;
-
-// Helper function to create a custom marker element
-function createCustomMarker() {
-  const markerElement = document.createElement("div");
-  markerElement.className = "custom-marker"; // Add a custom class
-
-  // Set the background image to the PNG file
-  markerElement.style.backgroundImage = "url('/location-icon.png')";
-  markerElement.style.backgroundSize = "contain";
-  markerElement.style.width = "30px"; // Adjust the size as needed
-  markerElement.style.height = "30px"; // Adjust the size as needed
-  markerElement.style.position = "absolute"; // Ensure it renders on top
-  markerElement.style.zIndex = "9999"; // Place it above other layers
-
-  return markerElement;
+  useEffect(() => addClickEvent(), [addClickEvent])
+  useEffect(() => cleanUpMarker(), [cleanUpMarker])
 }
+
+export default useMapClick
