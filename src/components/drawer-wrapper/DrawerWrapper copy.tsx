@@ -1,12 +1,11 @@
-// Import necessary modules and components
+// import * as React from 'react'
 import React, { useEffect } from 'react'
+
 import { SxProps, Theme, useTheme } from '@mui/material/styles'
 import Button from '@mui/material/Button'
-import Drawer from '@mui/material/Drawer'
+import SwipeableDrawer from '@mui/material/SwipeableDrawer'
 import Box from '@mui/material/Box'
-import Tooltip from '@mui/material/Tooltip'
 
-// Import icons
 import InfoIcon from '@mui/icons-material/Info'
 import HomeIcon from '@mui/icons-material/Home'
 import CloseIcon from '@mui/icons-material/Close'
@@ -14,8 +13,10 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import LayersIcon from '@mui/icons-material/Layers'
 import EvStationIcon from '@mui/icons-material/EvStation'
 
-// Import types
+import Tooltip from '@mui/material/Tooltip'
+
 import { DrawerWrapperProps } from '../../types-and-interfaces/interfaces'
+
 
 // Buttons Component
 const Buttons: React.FC<{
@@ -51,6 +52,7 @@ const Buttons: React.FC<{
         return (
           <Tooltip key={index} title={label} arrow>
             <Button
+              key={index}
               onClick={(event) => onButtonClick(label, event)}
               sx={{
                 margin: 1,
@@ -74,25 +76,44 @@ const Buttons: React.FC<{
 // DrawerWrapper Component
 const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
   const [isOpen, setIsOpen] = React.useState(false)
+  const [transitionDuration, setTransitionDuration] = React.useState(0)
+  const [transitionEasing, setTransitionEasing] = React.useState('')
+  // const [currentButton, setCurrentButton] = React.useState<string | null>(null)
   const theme = useTheme()
 
-  const transitionDuration = 300 // Adjust as needed
-  const transitionEasing = theme.transitions.easing.easeOut
+  const enteringScreen = 800
+  const leavingScreen = 800
 
   const size = { top: 350, bottom: 300, left: 350, right: 350 } // Drawer size
 
-  const toggleDrawer = (open: boolean, label?: string) => (event: React.MouseEvent | React.KeyboardEvent) => {
-    // Only allow closing via the close button
-    if (open) {
-      setIsOpen(true)
-      if (label && props.setBtn) props.setBtn(label)
-    } else {
-      setIsOpen(false)
-      if (props.setClickedLocal) props.setClickedLocal(null)
-    }
-  }
+  const toggleDrawer =
+    (open: boolean, label?: string) => (event: React.KeyboardEvent | React.MouseEvent) => {
+      if (
+        event &&
+        event.type === 'keydown' &&
+        ((event as React.KeyboardEvent).key === 'Tab' ||
+          (event as React.KeyboardEvent).key === 'Shift')
+      ) {
+        return
+      }
 
-  const handleButtonClick = (label: string, event: React.MouseEvent | React.KeyboardEvent) => {
+      const duration = open
+        ? enteringScreen
+        : leavingScreen
+      const easing = open
+        ? theme.transitions.easing.easeOut
+        : theme.transitions.easing.sharp
+
+      setTransitionDuration(duration)
+      setTransitionEasing(easing)
+      setIsOpen(open)
+
+      if(open && label && props.setBtn) props.setBtn(label)
+      if(!open && props.setClickedLocal) props.setClickedLocal(null)
+
+    }
+
+  const handleButtonClick = (label: string, event: React.KeyboardEvent | React.MouseEvent) => {
     toggleDrawer(true, label)(event)
   }
 
@@ -163,66 +184,80 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
   }
 
   useEffect(() => {
-    if (props.clickedLocal) {
-      setIsOpen(true)
-      if (props.setBtn) props.setBtn(props.clickedLocal)
-    } else {
-      setIsOpen(false)
-      if (props.setClickedLocal) props.setClickedLocal(null)
+    // if (props.clickedLocal !== null ) {
+      if (props.clickedLocal) {
+      setTransitionDuration(props.clickedLocal ? enteringScreen : leavingScreen);
+      setTransitionEasing(
+        props.clickedLocal ? theme.transitions.easing.easeOut : theme.transitions.easing.sharp
+      );
+      setIsOpen(true);
+      if (!props.clickedLocal && props.setClickedLocal) {
+        props.setClickedLocal(null);
+      }
     }
-  }, [props.clickedLocal, props.setClickedLocal, props.setBtn])
-
+  }, [props.clickedLocal, props.setClickedLocal, theme.transitions.easing]);
+  
   return (
     <div style={{ position: 'relative' }}>
-      {/* Buttons */}
-      { renderBtns() }
+      <React.Fragment key={`drawer-${props.anchor}`}>
 
-      {/* Persistent Drawer */}
-      <Drawer
-        anchor={props.anchor}
-        open={isOpen}
-        variant="persistent"
-        transitionDuration={{
-          enter: transitionDuration,
-          exit: transitionDuration,
-        }}
-        PaperProps={{
-          sx: {
-            width: props.anchor === 'left' || props.anchor === 'right' ? `${size[props.anchor]}px` : '100vw',
-            height: props.anchor === 'top' || props.anchor === 'bottom' ? `${size[props.anchor]}px` : '100vh',
-            overflow: 'hidden',
-          }
-        }}
-      >
-        {/* Close Button */}
-        <Button
-          onClick={toggleDrawer(false)}
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 1200,
-            minWidth: 'auto',
-            padding: 0,
+        {/* Toggles */}
+        { renderBtns() }
+
+        {/* Drawer */}
+        <SwipeableDrawer
+          anchor={props.anchor}
+          open={isOpen}
+          onClose={toggleDrawer(false)}
+          onOpen={toggleDrawer(true)}
+          ModalProps={{
+            keepMounted: true, // Keeps the drawer in the DOM for performance
+            BackdropProps: { style: { backgroundColor: 'transparent' } }, // Disables background dimming
+          }}
+          transitionDuration={{
+            enter: enteringScreen,
+            exit: leavingScreen,
           }}
         >
-          <CloseIcon />
-        </Button>
+          {/* Drawer Content Wrapper */}
+          <Box
+            sx={{
+              width: props.anchor === 'left' || props.anchor === 'right' ? `${size[props.anchor]}px` : '100vw',
+              height: props.anchor === 'top' || props.anchor === 'bottom' ? `${size[props.anchor]}px` : '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden', // Prevents overflow outside
+            }}
+          >
+            {/* Close Button */}
+            <Button
+              onClick={toggleDrawer(false)}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                zIndex: 1200,
+                minWidth: 'auto',
+                padding: 0,
+              }}
+            >
+              <CloseIcon />
+            </Button>
 
-        {/* Scrollable Content */}
-        <Box
-          sx={{
-            flex: 1,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            padding: 0.5,
-            marginTop: props.anchor === 'top' ? '48px' : 0, // Adjust margin if needed
-            marginBottom: props.anchor === 'bottom' ? '48px' : 0, // Adjust margin if needed
-          }}
-        >
-          {props.children}
-        </Box>
-      </Drawer>
+            {/* Scrollable Content */}
+            <Box
+              sx={{
+                flex: 1, // Allows this Box to take the available space
+                overflowY: 'auto', // Enables vertical scrolling
+                overflowX: 'hidden', // Prevents horizontal scrolling
+                padding: 2, // Adds padding around content
+              }}
+            >
+              {props.children}
+            </Box>
+          </Box>
+        </SwipeableDrawer>
+      </React.Fragment>
     </div>
   )
 }

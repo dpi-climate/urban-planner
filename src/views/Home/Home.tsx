@@ -10,6 +10,9 @@ import ClickedInfoContent from "../../components/drawer-contents/ClickedInfoCont
 
 import { CLIMATE_VARIABLES, CLIMATE_YEARS } from "../../consts/consts"
 import { DataLoader } from "../../data-loader/DataLoader"
+import ColorBarWrapper from "../../components/map/ColorBarWrapper"
+import { Row } from "react-bootstrap"
+import ColorBar from "../../components/map/ColorBar"
 
 const Home = () => {
  
@@ -17,12 +20,14 @@ const Home = () => {
   // ////////////////   CLIMATE CONTENT   ////////////////////////////////////////////
   const initialIdx = 0
   
-  const variablesList = CLIMATE_VARIABLES.map(({ threshold, ...rest }) => rest)
+  // const variablesList = CLIMATE_VARIABLES.map(({ threshold, ...rest }) => rest)
+  const variablesList = CLIMATE_VARIABLES.map(({ colors, domain, ...rest }) => rest)
+  const spatialAggList = [{ name: "Points", id: "" }, { name: "Census Tract", id: "ct" }]
   
   const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
   const [variableIdx, setVariableIdx]   = useState<number>(initialIdx)
+  const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(initialIdx)
   
-  const [threshold, setThreshold]             = useState<{value: number, color: string}[] | null>(CLIMATE_VARIABLES[initialIdx].threshold)
 
   const [riskData, setRiskData] = useState<{ year: string, value: number}[]>([])
   
@@ -32,17 +37,21 @@ const Home = () => {
   const infoDrawerBtns = ["Close"]
 
   const [clickedLocal, setClickedLocal] = useState<{lat:number, lng: number, elevation: number | null} | null>(null)
+  const [colorBarProps, setColorBarProps] = useState({ colors: CLIMATE_VARIABLES[initialIdx].colors, domain: CLIMATE_VARIABLES[initialIdx].domain})
   
   // ////////////////   UPDATE FUNCTIONS   ///////////////////////////////////////////
 
 
-  const updateLayer = (varIdx: number | null, yIdx: number | null) => {
+  const updateLayer = (varIdx: number | null, yIdx: number | null, sIdx: number | null) => {
     if(varIdx !== null) setVariableIdx(varIdx)
-    if(yIdx !== null) setYearIdx(yIdx)
+    if(yIdx !== null)   setYearIdx(yIdx)
+    if(sIdx !== null)   setSpatialAggIdx(sIdx)
+
   }
 
-  const updateRiskData = async (ptIdx: number) => {
+  const updateRiskData = async (ptIdx: number | [number, number], elevation: number | null) => {
     const _riskData = await DataLoader.getRiskData(ptIdx)
+    // setClickedLocal({ lat: ptIdx[0], lng: ptIdx[1], elevation: elevation })
     setRiskData(_riskData)
   }
 
@@ -58,6 +67,8 @@ const Home = () => {
             variables={variablesList} 
             yearIdx={yearIdx}
             years={CLIMATE_YEARS}
+            spatialAggIdx={spatialAggIdx}
+            spatialAggList={spatialAggList}
             updateLayer={updateLayer}
             />}
             
@@ -76,11 +87,20 @@ const Home = () => {
           zoom={6}
           variable={variablesList[variableIdx].id}
           year={CLIMATE_YEARS[yearIdx]}
-          threshold={threshold}
+          spatialLevel={spatialAggList[spatialAggIdx].id}
           clickedLocal={clickedLocal}
           setClickedLocal={setClickedLocal}
           updateRiskData={updateRiskData}
         />
+        <ColorBarWrapper display={() => variableIdx && yearIdx ? "block" : "none"}>
+          <Row key={`row-map-legend-${variablesList[variableIdx].id}-${CLIMATE_YEARS[yearIdx]}`} style={{ marginTop:"5px" }}>
+            <ColorBar 
+              colorScheme={CLIMATE_VARIABLES[variableIdx].colors} 
+              legId= {`${variablesList[variableIdx].id}`} 
+              domain= {CLIMATE_VARIABLES[variableIdx].domain} 
+              label={`${variablesList[variableIdx].name}`}/>
+          </Row>
+        </ColorBarWrapper>
       </ElementWrapper>
     )
   }

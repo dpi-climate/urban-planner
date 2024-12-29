@@ -22,7 +22,7 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
         <Select
           value={`${props.variableIdx}`}
           label={props.variables[props.variableIdx].name}
-          onChange={(event: SelectChangeEvent) => props.updateLayer(parseInt(event.target.value), null)}
+          onChange={(event: SelectChangeEvent) => props.updateLayer(parseInt(event.target.value), null, null)}
         >
           {
             props.variables.map((obj: {name: string, id: string}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
@@ -33,21 +33,39 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
   }
 
   const renderProperties = () => {
-    // console.log(props.variables, props.variableIdx, props.yearIdx, props.variables && props.variableIdx && props.yearIdx)
     if(props.variables && props.yearIdx !== null) {
       return (
         <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-          <InputLabel>Colors</InputLabel>
+          <InputLabel>Year</InputLabel>
           <Select
             value={`${props.yearIdx}`}
             label={props.years[props.yearIdx]}
-            onChange={(event: SelectChangeEvent) => props.updateLayer(null, parseInt(event.target.value))}
+            onChange={(event: SelectChangeEvent) => props.updateLayer(null, parseInt(event.target.value), null)}
           >
-            {/* {
-              props.variables[props.variableIdx].properties.map((p: string, i: number) => <MenuItem key={`dropdown_prop_key_${p}`} value={i}>{p}</MenuItem>)
-            } */}
             {
               props.years.map((y: string, idx: number) => <MenuItem key={`dp_year_key_${idx}`} value={idx}>{y}</MenuItem>)
+            }
+          </Select>
+        </FormControl>
+      )
+      
+    } else {
+      return null
+    }
+  }
+
+  const renderSpatialResolution = () => {
+    if(props.variables && props.yearIdx !== null) {
+      return (
+        <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
+          <InputLabel>Spatial Level</InputLabel>
+          <Select
+            value={`${props.spatialAggIdx}`}
+            label={props.spatialAggList[props.spatialAggIdx].name}
+            onChange={(event: SelectChangeEvent) => props.updateLayer(null, null, parseInt(event.target.value))}
+          >
+            {
+              props.spatialAggList.map((s: string, idx: number) => <MenuItem key={`dp_sAgg_key_${idx}`} value={idx}>{s.name}</MenuItem>)
             }
           </Select>
         </FormControl>
@@ -67,6 +85,7 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
 
       {renderVariableDropdown()}
       {renderProperties()}
+      {renderSpatialResolution()}
       
     </Box>
   )

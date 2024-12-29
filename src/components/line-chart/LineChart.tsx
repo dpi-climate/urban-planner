@@ -10,23 +10,23 @@ type LineChartProps = {
   data: DataPoint[]
   width: number
   height: number
+  xAxisLabel: string
+  yAxisLabel: string
 }
 
-const LineChart: React.FC<LineChartProps> = ({ data, width, height }) => {
+const LineChart: React.FC<LineChartProps> = ({ data, width, height, xAxisLabel, yAxisLabel }) => {
   const svgRef = useRef<SVGSVGElement | null>(null)
 
   useEffect(() => {
     if (!svgRef.current) return
 
     const svg = d3.select(svgRef.current)
-    svg.selectAll("*").remove() // Clear existing content
+    svg.selectAll("*").remove()
 
-    // Set up margins and dimensions
-    const margin = { top: 20, right: 30, bottom: 30, left: 40 }
+    const margin = { top: 20, right: 30, bottom: 50, left: 50 }
     const chartWidth = width - margin.left - margin.right
     const chartHeight = height - margin.top - margin.bottom
 
-    // Create scales
     const xScale = d3
       .scalePoint()
       .domain(data.map((d) => d.year))
@@ -38,13 +38,11 @@ const LineChart: React.FC<LineChartProps> = ({ data, width, height }) => {
       .domain([0, d3.max(data, (d) => d.value) || 0])
       .range([chartHeight, 0])
 
-    // Create line generator
     const line = d3
       .line<DataPoint>()
       .x((d) => xScale(d.year) || 0)
       .y((d) => yScale(d.value))
       .curve(d3.curveMonotoneX)
-
 
     const g = svg
       .append("g")
@@ -55,8 +53,29 @@ const LineChart: React.FC<LineChartProps> = ({ data, width, height }) => {
       .attr("transform", `translate(0,${chartHeight})`)
       .call(d3.axisBottom(xScale))
 
+    // Add X axis label
+    svg
+      .append("text")
+      .attr("text-anchor", "middle")
+      .attr("x", width / 2)
+      .attr("y", height - 10) // Adjust based on margin.bottom
+      .text(xAxisLabel)
+      .style("font-size", "12px")
+      .style("fill", "#000")
+
     // Add Y axis
     g.append("g").call(d3.axisLeft(yScale))
+
+    // Add Y axis label
+    svg
+      .append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", `rotate(-90)`)
+      .attr("x", -(height / 2))
+      .attr("y", 15) // Adjust based on margin.left
+      .text(yAxisLabel)
+      .style("font-size", "12px")
+      .style("fill", "#000")
 
     // Add line path
     g.append("path")
@@ -65,7 +84,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, width, height }) => {
       .attr("stroke", "steelblue")
       .attr("stroke-width", 2)
       .attr("d", line)
-  }, [data, width, height])
+  }, [data, width, height, xAxisLabel, yAxisLabel])
 
   return <svg ref={svgRef} width={width} height={height}></svg>
 }
