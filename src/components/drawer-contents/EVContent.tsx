@@ -1,30 +1,31 @@
-// EVContent.jsx
-import React, { useState } from 'react'
-
+import React from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-
-import { DrawerWrapperContentProps } from '../../types-and-interfaces/interfaces'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 const title = "EV Stations"
 const subtitle = ""
 
-const EVContent: React.FC = (props) => {
+interface IEVContent {
+  showStations: boolean
+  setShowStations: (s: boolean) => void
+}
+
+const EVContent: React.FC<IEVContent> = (props) => {
   return (
     <Box sx={{ padding: 2 }}>
       <Typography variant="h6">{title}</Typography>
       <Typography variant="body1">
         {subtitle}
       </Typography>
-
-    {/* Add content */}
-      
+      <FormControlLabel
+        control={<Checkbox checked={props.showStations} onChange={() => props.setShowStations(!props.showStations)} />}
+        label="Current EV Stations"
+      />
     </Box>
   )
 }
 
 export default EVContent
+// onChange={() => props.setShowStations(!props.showStations)}

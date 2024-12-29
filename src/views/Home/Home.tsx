@@ -15,6 +15,8 @@ import ColorBarWrapper from "../../components/map/ColorBarWrapper"
 import { Row } from "react-bootstrap"
 import ColorBar from "../../components/map/ColorBar"
 
+import MySlider from "../../components/map/MySlider"
+
 const Home = () => {
  
   // /////////////////////////////////////////////////////////////////////////////////
@@ -36,10 +38,14 @@ const Home = () => {
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
   const drawerBtns = ["Layers", "EV-Stations"]
   // const drawerBtns = ["Layers", "Home"]
-  const infoDrawerBtns = ["Close"]
+
+  const [showStations, setShowStations] = useState<boolean>(true)
 
   const [clickedLocal, setClickedLocal] = useState<{lat:number, lng: number, elevation: number | null} | null>(null)
   const [colorBarProps, setColorBarProps] = useState({ colors: CLIMATE_VARIABLES[initialIdx].colors, domain: CLIMATE_VARIABLES[initialIdx].domain})
+
+  const [controlDrag, setControlDrag] = useState<boolean>(true)
+  const [opacity, setOpacity] = useState<number>(1.0)
   
   // ////////////////   UPDATE FUNCTIONS   ///////////////////////////////////////////
 
@@ -86,6 +92,8 @@ const Home = () => {
             />}
           {activeDrawerBtn === 'EV-Stations' && 
           <EVContent 
+            showStations={showStations}
+            setShowStations={setShowStations}
             
             />}
             
@@ -105,18 +113,23 @@ const Home = () => {
           zoom={6}
           variable={variablesList[variableIdx].id}
           year={CLIMATE_YEARS[yearIdx]}
+          showStations={showStations}
           spatialLevel={spatialAggList[spatialAggIdx].id}
           clickedLocal={clickedLocal}
+          opacity={opacity}
           setClickedLocal={setClickedLocal}
           updateRiskData={updateRiskData}
         />
-        <ColorBarWrapper display={() => variableIdx && yearIdx ? "block" : "none"}>
+        <ColorBarWrapper display={() => variableIdx && yearIdx ? "block" : "none"} controlDrag={controlDrag} >
           <Row key={`row-map-legend-${variablesList[variableIdx].id}-${CLIMATE_YEARS[yearIdx]}`} style={{ marginTop:"5px" }}>
             <ColorBar 
               colorScheme={CLIMATE_VARIABLES[variableIdx].colors} 
               legId= {`${variablesList[variableIdx].id}`} 
               domain= {CLIMATE_VARIABLES[variableIdx].domain} 
               label={`${variablesList[variableIdx].name}`}/>
+          </Row>
+          <Row key="row-opacity" style={{ marginTop:"5px" }}>
+            <MySlider initialValue={1.0} min={0.0} max={1.0} step={0.1} setControlDrag={setControlDrag} onChange={setOpacity}/>
           </Row>
         </ColorBarWrapper>
       </ElementWrapper>

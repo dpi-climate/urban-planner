@@ -8,7 +8,8 @@ interface IUseLayersParams {
   year: string
   spatialLevel: string
   zoom: number
-  // stations: any // <--- if you have stations here, or use props.stations from parent
+  showStations: boolean
+  opacity: number
 }
 
 // Simplified data types
@@ -46,6 +47,8 @@ export default function useLayers({
   year,
   spatialLevel,
   zoom,
+  showStations,
+  opacity
 }: IUseLayersParams): Layer[] {
   const [pointData, setPointData] = useState<IPointData | null>(null)
   const [polygonData, setPolygonData] = useState<IPolygonData | null>(null)
@@ -57,21 +60,8 @@ export default function useLayers({
   useEffect(() => {
     // Example: load your stations from somewhere
     async function loadStations() {
-      // If you have a data loader that returns a GeoJSON or array of station features:
-      // const stationData = await DataLoader.getStations();
-      // setStations(stationData)
-
-      // Hard-coded example:
-      setStations([
-        {
-          geometry: { type: 'Point', coordinates: [-74.006, 40.7128] },
-          properties: { stationName: 'NYC Station' }
-        },
-        {
-          geometry: { type: 'Point', coordinates: [-118.2437, 34.0522] },
-          properties: { stationName: 'LA Station' }
-        },
-      ])
+      const stationData = await DataLoader.getStations()
+      setStations(stationData)
     }
 
     loadStations()
@@ -167,45 +157,55 @@ export default function useLayers({
       data: toGeoJSON(polygonData),
       filled: true,
       stroked: true,
-      getFillColor: (f) => f.properties.color,
+      // getFillColor: (f) => f.properties.color,
+      getFillColor: (f) => {
+        const [r, g, b, a] = f.properties.color
+        return [r, g, b, Math.floor(a * opacity)]
+      },
       getLineColor: [0, 0, 0, 255],
+      // opacity: opacity,
       lineWidthMinPixels: 1,
       pickable: false,
     })
-  }, [polygonData, variable, year])
+  }, [polygonData, variable, year, opacity])
 
-  // Create the station layer (PNG icons)
   const stationLayer = useMemo(() => {
-    // Only create the layer if we have stations
-    if (!stations || !stations.length) return null
-
+    // 1. Safely check you have a FeatureCollection with non-empty `features`
+    if (!showStations || !stations || !stations.features || !stations.features.length) {
+      return null;
+    }
+  
+    // 2. Create the IconLayer using `stations.features`
     return new IconLayer({
       id: 'station-layer',
-      data: stations,
-
-      // This is the PNG that acts as your "atlas"
-      // You can use one PNG if all icons are the same.
+      data: stations.features,
+  
+      // If you have a single PNG for all markers:
       iconAtlas: '/Electric_Charging_Station_Clean_Transparent.png',
-
-      // If using an atlas with multiple icons, define the mapping here
+      // Define how to crop your single icon from that PNG
       iconMapping: {
-        marker: { x: 0, y: 0, width: 128, height: 128, mask: true }
+        marker: { x: 0, y: 0, width: 900, height: 900, mask: false },
       },
-
+  
       // Accessors
-      getPosition: (f) => f.geometry.coordinates,
+      // geometry.coordinates should be [lon, lat]
+      getPosition: (feature) => feature.geometry.coordinates,
+      // If they are simple single-icon markers:
       getIcon: () => 'marker',
+      // Adjust size as needed
       getSize: () => 4,
       sizeScale: 15,
-
-      pickable: false,
-      // onClick: (info) => {
-      //   if (info.object) {
-      //     alert(`Clicked on station: ${info.object.properties.stationName}`)
-      //   }
-      // },
-    })
-  }, [stations])
+  
+      pickable: true,
+      onClick: (info) => {
+        // info.object will be your Feature, so you can access properties:
+        if (info.object) {
+          const stationName = info.object.properties?.stationName;
+          alert(`Clicked on station: ${stationName}`);
+        }
+      },
+    });
+  }, [stations, showStations]);
 
   // Decide which layers to return
   return useMemo(() => {

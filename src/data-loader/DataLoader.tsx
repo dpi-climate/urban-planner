@@ -125,6 +125,9 @@ export abstract class DataLoader {
     }
 
     static async getStations() {
-      
+      const url = `${serverUrl}/stations`
+      const response = await axios.get(url)
+      return response.data
+
     }
 }

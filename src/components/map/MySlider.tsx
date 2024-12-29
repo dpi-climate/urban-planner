@@ -27,7 +27,7 @@ function MySlider(props: MySliderProps) {
         marginRight: '10px',
       }}
       onPointerEnter={() => props.setControlDrag(false)}
-      onPointerLeave={() => props.setControlDrag(true)}
+      onPointerLeave={() => {props.setControlDrag(true)}}
     > Opacity
       <Slider
         min={props.min}
@@ -35,7 +35,8 @@ function MySlider(props: MySliderProps) {
         defaultValue={props.initialValue}
         step={props.step}
         size="small"
-        onChange={handleChange}
+        // onChange={handleChange}
+        onChangeCommitted={handleChange}
         aria-label="Small"
         valueLabelDisplay="auto"
       />

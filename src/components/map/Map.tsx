@@ -18,6 +18,8 @@ interface IMap {
   variable: string
   year: string
   spatialLevel: any
+  showStations: boolean
+  opacity: number
   setClickedLocal: React.Dispatch<
     React.SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>
   >
@@ -75,6 +77,8 @@ const Map: React.FC<IMap> = (props) => {
     year: props.year,
     spatialLevel: props.spatialLevel,
     zoom: currentZoom,
+    showStations: props.showStations,
+    opacity: props.opacity
   })
 
   return (
