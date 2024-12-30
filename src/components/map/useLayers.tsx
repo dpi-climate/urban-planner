@@ -53,12 +53,9 @@ export default function useLayers({
   const [pointData, setPointData] = useState<IPointData | null>(null)
   const [polygonData, setPolygonData] = useState<IPolygonData | null>(null)
 
-  // For demonstration, pretend we get stations from props or otherwise:
-  // In a real scenario, pass them in as a prop or load them in a state, etc.
   const [stations, setStations] = useState<IStationFeature[]>([])
 
   useEffect(() => {
-    // Example: load your stations from somewhere
     async function loadStations() {
       const stationData = await DataLoader.getStations()
       setStations(stationData)
@@ -97,17 +94,16 @@ export default function useLayers({
     }
   }, [variable, year, spatialLevel])
 
-  // Decide how large the points are
   const radiusScale = useMemo(() => {
     if (zoom <= 6) return 1
     else if (zoom <= 10) return 0.5
     else if (zoom <= 12) return 0.25
     else if (zoom <= 14.5) return 0.1
     else if (zoom <= 17) return 0.05
+    else if (zoom <= 20) return 0.01
     return 0.01
   }, [zoom])
 
-  // Create the point layer
   const pointLayer = useMemo(() => {
     if (!pointData) return null
 
@@ -170,7 +166,6 @@ export default function useLayers({
   }, [polygonData, variable, year, opacity])
 
   const stationLayer = useMemo(() => {
-    // 1. Safely check you have a FeatureCollection with non-empty `features`
     if (!showStations || !stations || !stations.features || !stations.features.length) {
       return null;
     }
@@ -180,47 +175,37 @@ export default function useLayers({
       id: 'station-layer',
       data: stations.features,
   
-      // If you have a single PNG for all markers:
       iconAtlas: '/Electric_Charging_Station_Clean_Transparent.png',
-      // Define how to crop your single icon from that PNG
       iconMapping: {
         marker: { x: 0, y: 0, width: 900, height: 900, mask: false },
       },
-  
-      // Accessors
-      // geometry.coordinates should be [lon, lat]
       getPosition: (feature) => feature.geometry.coordinates,
-      // If they are simple single-icon markers:
+
       getIcon: () => 'marker',
-      // Adjust size as needed
       getSize: () => 4,
       sizeScale: 15,
-  
-      pickable: true,
-      onClick: (info) => {
-        // info.object will be your Feature, so you can access properties:
-        if (info.object) {
-          const stationName = info.object.properties?.stationName;
-          alert(`Clicked on station: ${stationName}`);
-        }
-      },
+      pickable: false,
+      // onClick: (info) => {
+      //   // info.object will be your Feature, so you can access properties:
+      //   if (info.object) {
+      //     const stationName = info.object.properties?.stationName;
+      //     alert(`Clicked on station: ${stationName}`);
+      //   }
+      // },
     });
   }, [stations, showStations]);
 
-  // Decide which layers to return
   return useMemo(() => {
     const layers: Layer[] = []
 
-    // If polygons are showing at the 'ct' spatial level
     if (spatialLevel === "ct" && polygonLayer) {
       layers.push(polygonLayer)
     }
-    // If points are showing at the '' (empty) spatial level
+
     else if (spatialLevel === "" && pointLayer) {
       layers.push(pointLayer)
     }
 
-    // If we have stations, always place them on top
     if (stationLayer) {
       layers.push(stationLayer)
     }

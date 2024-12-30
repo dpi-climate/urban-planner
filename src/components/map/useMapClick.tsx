@@ -2,7 +2,7 @@ import "./useMapClick.css"
 import { useCallback, useEffect, useState } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
-import createEvStationIcon from "../../utils/EvStationIcon"
+import {createEvStationIcon, createLocationIcon} from "../../utils/Icons"
 import { update } from "lodash"
 
 interface ClickedLocation {
@@ -41,7 +41,8 @@ const useMapClick = (props: UseMapClickProps) => {
         if (!marker) {
           const newMarker = new mapboxgl.Marker({
             // element: createCustomMarker(), // Use a custom element
-            element: createEvStationIcon(),
+            element: createLocationIcon()
+            // element: createEvStationIcon(),
           })
             .setLngLat([lng, lat])
             .addTo(map)

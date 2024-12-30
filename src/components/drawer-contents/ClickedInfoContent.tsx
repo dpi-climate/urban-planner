@@ -62,14 +62,14 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
     if (props.clickedLocal) {
       return (
         <>
-          {/* <LocationOnIcon
+          <LocationOnIcon
             sx={{
               color: 'red',
               marginRight: 1,
               filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4))',
             }}
-          /> */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          />
+          {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <img
               src={"/Electric_Charging_Station_Clean_Transparent.png"}
               alt="Location Icon"
@@ -80,7 +80,7 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
                 filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4))',
               }}
             />
-          </Box>
+          </Box> */}
           <Box>
             <Typography variant="body2"><strong>Elevation:</strong> {props.clickedLocal.elevation?.toFixed(2)} m</Typography>
             <Typography variant="body2"><strong>Latitude:</strong> {props.clickedLocal.lat.toFixed(2)}°</Typography>

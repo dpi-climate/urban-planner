@@ -43,18 +43,19 @@ const Map: React.FC<IMap> = (props) => {
       zoom: props.zoom,
     })
 
-    mapInstance.on("load", () => {
-      mapInstance.addSource("my-terrain-source", {
-        type: "raster-dem",
-        url: "mapbox://mapbox.terrain-rgb",
-        tileSize: 512,
-        maxzoom: 14,
-      })
-      mapInstance.setTerrain({ source: "my-terrain-source" })
-    })
+    // mapInstance.on("load", () => {
+    //   mapInstance.addSource("my-terrain-source", {
+    //     type: "raster-dem",
+    //     url: "mapbox://mapbox.terrain-rgb",
+    //     tileSize: 512,
+    //     maxzoom: 14,
+    //   })
+    //   mapInstance.setTerrain({ source: "my-terrain-source" })
+    // })
 
     mapInstance.on("zoom", () => {
       setCurrentZoom(mapInstance.getZoom())
+      console.log(mapInstance.getZoom())
     })
 
     setMap(mapInstance)
