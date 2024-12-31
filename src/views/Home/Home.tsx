@@ -21,7 +21,7 @@ const Home = () => {
  
   // /////////////////////////////////////////////////////////////////////////////////
   // ////////////////   CLIMATE CONTENT   ////////////////////////////////////////////
-  const initialIdx = 0
+  const initialIdx = 2
   
   // const variablesList = CLIMATE_VARIABLES.map(({ threshold, ...rest }) => rest)
   const variablesList = CLIMATE_VARIABLES.map(({ colors, domain, ...rest }) => rest)
@@ -29,8 +29,7 @@ const Home = () => {
   
   const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
   const [variableIdx, setVariableIdx]   = useState<number>(initialIdx)
-  const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(initialIdx)
-  // const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(1)
+  const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(0)
   
 
   const [riskData, setRiskData] = useState<{ year: string, value: number}[]>([])

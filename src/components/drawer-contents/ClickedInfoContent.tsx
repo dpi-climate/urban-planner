@@ -82,7 +82,7 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
             />
           </Box> */}
           <Box>
-            <Typography variant="body2"><strong>Elevation:</strong> {props.clickedLocal.elevation?.toFixed(2)} m</Typography>
+            {/* <Typography variant="body2"><strong>Elevation:</strong> {props.clickedLocal.elevation?.toFixed(2)} m</Typography> */}
             <Typography variant="body2"><strong>Latitude:</strong> {props.clickedLocal.lat.toFixed(2)}°</Typography>
             <Typography variant="body2"><strong>Longitude:</strong> {props.clickedLocal.lng.toFixed(2)}°</Typography>
           </Box>

@@ -4,6 +4,7 @@ export const CLIMATE_YEARS = Array.from({ length: 2023 - 1980 + 1 }, (_, i) => (
 
 // const prcp_domain_inches = [0, 0.01, 0.1, 0.25, 0.5, 1, 1.5, 2, 3, 4, 6, 8, 10, 15, 20, 30]
 const prcp_domain_inches = [0, 0.01, 0.1, 0.25, 0.5, 1, 1.5, 2, 3, 4, 6, 8, 10]
+const prcp_domain_mm = prcp_domain_inches.map(value => Number((value * 25.4).toFixed(2)))
 
 const n_min_temp = 14
 const start_min_temp = -20
@@ -108,21 +109,21 @@ export const CLIMATE_VARIABLES = [
   { 
     name: "Annual Daily Max Precipitation", 
     id: "prcp", 
-    domain: prcp_domain_inches.map(value => Number((value * 25.4).toFixed(2))),
+    domain: prcp_domain_mm,
     colors: [
-    [255,255,255],
-    [199,233,192],
-    [161,217,155],
-    [116,196,118],
-    [49,163,83],
-    [0,109,44],
-    [255,250,138],
-    [255,204,79],
-    [254,141,60],
-    [252,78,42],
-    [214,26,28],
-    [173,0,38],
-    [112,0,38],
+    [255,255,255], // ≤ 0.00
+    [199,233,192], // 0.01 - 0.25
+    [161,217,155], // 0.26 - 2.54
+    [116,196,118], // 2.55 - 6.35
+    [49,163,83],   // 6.36 - 12.70
+    [0,109,44],    // 12.71 - 25.40
+    [255,250,138], // 25.41 - 38.10
+    [255,204,79],  // 38.11 - 50.80
+    [254,141,60],  // 50.81 - 76.20
+    [252,78,42],   // 76.21 - 101.60
+    [214,26,28],   // 101.61 - 152.40
+    [173,0,38],    // 152.41 - 203.20
+    [112,0,38],    // 203.21 - 254.00
     // [59,0,48],
     // [76,0,115],
     // [255,219,255]
@@ -130,7 +131,7 @@ export const CLIMATE_VARIABLES = [
   },
 
 ]
-
+console.log(prcp_domain_mm)
 // export const BAR_CHART_DATA = [
 //     { category: "A", value: 30 },
 //     { category: "B", value: 50 },

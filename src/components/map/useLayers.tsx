@@ -52,7 +52,6 @@ export default function useLayers({
 }: IUseLayersParams): Layer[] {
   const [pointData, setPointData] = useState<IPointData | null>(null)
   const [polygonData, setPolygonData] = useState<IPolygonData | null>(null)
-
   const [stations, setStations] = useState<IStationFeature[]>([])
 
   useEffect(() => {
@@ -76,6 +75,7 @@ export default function useLayers({
         if (spatialLevel === "") {
           setPolygonData(null)
           setPointData(data)
+
         } else if (spatialLevel === "ct") {
           setPointData(null)
           setPolygonData(data)
@@ -106,7 +106,7 @@ export default function useLayers({
 
   const pointLayer = useMemo(() => {
     if (!pointData) return null
-
+    
     return new ScatterplotLayer({
       id: `scatterplot-layer-${variable}-${year}`,
       data: {
@@ -115,7 +115,7 @@ export default function useLayers({
           getPosition: { value: new Float32Array(pointData.positions), size: 2 },
           getFillColor: { value: new Uint8Array(pointData.colors), size: 4 },
         },
-        ids: pointData.ids,
+        // ids: pointData.ids,
         values: pointData.values,
       },
       getPosition: (d) => d.getPosition,
@@ -124,12 +124,17 @@ export default function useLayers({
       radiusScale: radiusScale,
       radiusMinPixels: 1,
       radiusMaxPixels: 500,
-      opacity: 1.0,
-      pickable: false,
+      opacity: opacity,
+      pickable: true,
+      onClick: (info) => {
+        const index = info.index;
+        const value = pointData.values[index];
+        const cl = pointData.colors[index];
+        console.log(`Value: ${value !== null ? value : 'N/A'}, ${cl}`);
+      }
     })
   }, [pointData, radiusScale, variable, year])
 
-  // Create the polygon layer
   const polygonLayer = useMemo(() => {
     if (!polygonData) return null
 

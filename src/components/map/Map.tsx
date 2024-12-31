@@ -55,7 +55,6 @@ const Map: React.FC<IMap> = (props) => {
 
     mapInstance.on("zoom", () => {
       setCurrentZoom(mapInstance.getZoom())
-      console.log(mapInstance.getZoom())
     })
 
     setMap(mapInstance)

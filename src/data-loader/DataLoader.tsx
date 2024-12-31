@@ -13,27 +13,56 @@ export abstract class DataLoader {
     
       if(sLevel === "") {
 
-      const buffer = response.data             // ArrayBuffer
-      const dataView = new DataView(buffer)
+        const buffer = response.data             // ArrayBuffer
+        const dataView = new DataView(buffer)
+        let offset = 0;
 
-        // Example parsing logic:
-        // 1) read 4 bytes for number of points
         const numPoints = dataView.getUint32(0, true)
-        let offset = 4
+        offset += 4
       
-        // 2) positions as float32[] (2 per point => length = numPoints * 2)
         const positions = new Float32Array(buffer, offset, numPoints * 2)
-        offset += numPoints * 2 * 4 // 4 bytes per float
+        offset += numPoints * 2 * 4
       
-        // 3) colors as Uint8Array (4 per point => length = numPoints * 4)
         const colors = new Uint8Array(buffer, offset, numPoints * 4)
         offset += numPoints * 4
+
+        const ids = new Uint32Array(buffer, offset, numPoints);
+        offset += numPoints * 4; // 4 bytes per integer
+
+        const idsArray = Array.from(ids);
+
+        // 5) Read Values (float or null)
+        // a) Number of values (should be equal to numPoints)
+        const numValues = dataView.getUint32(offset, true);
+        offset += 4;
+
+        const values = [];
+        for (let i = 0; i < numValues; i++) {
+          // b) Read presence flag (1 byte)
+          const flag = dataView.getUint8(offset);
+          offset += 1;
+
+          if (flag === 1) {
+            // c) Read Float32 value
+            const val = dataView.getFloat32(offset, true);
+            offset += 4;
+            values.push(val);
+          } else if (flag === 0) {
+            // d) Value is null
+            values.push(null);
+          } else {
+            console.warn(`Unexpected flag value ${flag} at index ${i}`);
+            values.push(null); // Default to null on unexpected flag
+          }
+        }
       
         // Return an object with typed arrays
         return {
           length: numPoints,
           positions,
           colors,
+          ids: idsArray,
+          values,
         }
       } else if(sLevel === "ct") {
         const buffer = response.data;
