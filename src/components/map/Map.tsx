@@ -15,16 +15,21 @@ interface IMap {
   style: string
   center: [number, number]
   zoom: number
-  variable: string
+  variable: string | null
   year: string
   spatialLevel: any
   showStations: boolean
   opacity: number
+  boundOpacity: number
   setClickedLocal: React.Dispatch<
     React.SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>
   >
   clickedLocal: { lat: number; lng: number; elevation: number | null } | null
+  boundaryId: string
   updateRiskData: (ptIdx: number | [number, number], elevation: number | null) => void
+  setSocioInfo: React.Dispatch<
+  React.SetStateAction<{ name: string; value: number}[]>
+>
 
 }
 
@@ -68,6 +73,7 @@ const Map: React.FC<IMap> = (props) => {
     map,
     clickedLocal: props.clickedLocal,
     variable: props.variable,
+    spatialLevel: props.spatialLevel,
     setClickedLocal: props.setClickedLocal,
     updateRiskData: props.updateRiskData
   })
@@ -78,7 +84,10 @@ const Map: React.FC<IMap> = (props) => {
     spatialLevel: props.spatialLevel,
     zoom: currentZoom,
     showStations: props.showStations,
-    opacity: props.opacity
+    opacity: props.opacity,
+    boundOpacity: props.boundOpacity,
+    boundaryId: props.boundaryId,
+    setSocioInfo:props.setSocioInfo
   })
 
   return (

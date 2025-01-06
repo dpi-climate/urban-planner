@@ -7,8 +7,8 @@ const prcp_domain_inches = [0, 0.01, 0.1, 0.25, 0.5, 1, 1.5, 2, 3, 4, 6, 8, 10]
 const prcp_domain_mm = prcp_domain_inches.map(value => Number((value * 25.4).toFixed(2)))
 
 const n_min_temp = 14
-const start_min_temp = -20
-const end_min_temp = 10
+const start_min_temp = -35
+const end_min_temp = 0
 
 const n_max_temp = 14
 const start_max_temp = 10
@@ -131,7 +131,7 @@ export const CLIMATE_VARIABLES = [
   },
 
 ]
-console.log(prcp_domain_mm)
+
 // export const BAR_CHART_DATA = [
 //     { category: "A", value: 30 },
 //     { category: "B", value: 50 },

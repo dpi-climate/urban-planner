@@ -3,15 +3,84 @@ import { serverUrl } from "../consts/consts"
 
 export abstract class DataLoader {
 
-    static async getPointLayerData(varId: string, year: string, sLevel: string) {
-      const url = `${serverUrl}/pt_layer_data`
+  static async getBoundariesList() {
+    const url = `${serverUrl}/boundary`
+    const response = await axios.get(url)
+    return response.data
+  }
+
+  static async getBoundary(bId: string) {
+    const url = `${serverUrl}/boundary`
+    const response = await axios.post(url, { b_id: bId }, { responseType: 'arraybuffer' })
+    const buffer = response.data
+    
+    const dataView = new DataView(buffer)
+      
+    let offset = 0
+  
+    // 1) number of tracts
+    const numTracts = dataView.getUint32(offset, true)
+    offset += 4
+  
+    const features = []
+  
+    for (let i = 0; i < numTracts; i++) {
+      // 2a) GEOID length
+      const geoIdLen = dataView.getUint32(offset, true)
+      offset += 4
+  
+      // 2b) GEOID bytes
+      const geoIdBytes = new Uint8Array(buffer, offset, geoIdLen)
+      offset += geoIdLen
+      const geoId = new TextDecoder("utf-8").decode(geoIdBytes)
+  
+      // 2e) geometry JSON length
+      const geomLen = dataView.getUint32(offset, true)
+      offset += 4
+  
+      // 2f) geometry bytes
+      const geomBytes = new Uint8Array(buffer, offset, geomLen)
+      offset += geomLen
+  
+      // parse geometry
+      const geomStr = new TextDecoder("utf-8").decode(geomBytes)
+      const geometry = JSON.parse(geomStr)
+  
+      features.push({
+        UNITID: geoId,
+        // average_value: avgVal,
+        // color: [r, g, b, a],
+        geometry: geometry,
+      })
+    }
+  
+    // Return an object that mimics your original { features: [...] } structure
+    return { features }
+
+  }
+
+  static async getMapClickBoudary() {
+    const url = `${serverUrl}/click_boundary`
+    const response = await axios.get(url)
+    return response.data
+  }
+  
+  static async getPointFeature(fileName: string) {
+    const url = `${serverUrl}/geojson_data`
+    const data = { params: { var_name: fileName } }
+    const response = await axios.get(url, data)
+    return response
+  }
+
+  static async getPointLayerData(varId: string, year: string, sLevel: string) {
+      const url = `${serverUrl}/climate_layer`
     
       const response = await axios.get(url, {
         params: { var_name: varId, year: year, s_agg: sLevel },
         responseType: 'arraybuffer',
       })
     
-      if(sLevel === "") {
+      if(sLevel === "pt") {
 
         const buffer = response.data             // ArrayBuffer
         const dataView = new DataView(buffer)
@@ -64,13 +133,11 @@ export abstract class DataLoader {
           ids: idsArray,
           values,
         }
-      } else if(sLevel === "ct") {
+      // } else if(sLevel === "ct" || sLevel === "bg") {
+      } else {
         const buffer = response.data;
         return parsePolygonBinary(buffer);
         
-      } else {
-        
-        return null
       }
 
       function parsePolygonBinary(buffer: ArrayBuffer) {
@@ -78,13 +145,13 @@ export abstract class DataLoader {
       
         let offset = 0;
       
-        // 1) number of tracts
-        const numTracts = dataView.getUint32(offset, true);
+        // 1) number of features
+        const numFeatures = dataView.getUint32(offset, true);
         offset += 4;
       
-        const tracts = [];
+        const features = [];
       
-        for (let i = 0; i < numTracts; i++) {
+        for (let i = 0; i < numFeatures; i++) {
           // 2a) GEOID length
           const geoIdLen = dataView.getUint32(offset, true);
           offset += 4;
@@ -117,46 +184,63 @@ export abstract class DataLoader {
           const geomStr = new TextDecoder("utf-8").decode(geomBytes);
           const geometry = JSON.parse(geomStr);
       
-          tracts.push({
-            GEOID: geoId,
-            average_value: avgVal,
+          features.push({
+            UNITID: geoId,
+            value: avgVal,
             color: [r, g, b, a],
             geometry: geometry,
           });
         }
       
         // Return an object that mimics your original { tracts: [...] } structure
-        return { tracts };
+        return { features };
       }
-      
+    }
+
+  static async getRiskData(ptIdx: number | [number, number]) {
+    const url = `${serverUrl}/risk_data`
+    let p = ptIdx
     
-    }
-
-    static async getRiskData(ptIdx: number | [number, number]) {
-      const url = `${serverUrl}/risk_data`
-      let p = ptIdx
-      
-      const data = Array.isArray(ptIdx)
-        ? { params: { lat: ptIdx[0] , lon: ptIdx[1] } }
-        : { params: { pt_idx: ptIdx } }
-            
-        const response = await axios.get(url, data)
-      
-        return response.data
-
-    }
-
-    static async getPointFeature(fileName: string) {
-      const url = `${serverUrl}/geojson_data`
-      const data = { params: { var_name: fileName } }
+    const data = Array.isArray(ptIdx)
+      ? { params: { lat: ptIdx[0] , lon: ptIdx[1] } }
+      : { params: { pt_idx: ptIdx } }
+          
       const response = await axios.get(url, data)
-      return response
-    }
-
-    static async getStations() {
-      const url = `${serverUrl}/stations`
-      const response = await axios.get(url)
+    
       return response.data
 
-    }
+  }
+
+  static async getSocioDataById(id: string, level: string){
+    const url = `${serverUrl}/socio`
+    const response = await axios.post(url, { id, level })
+    return response.data
+
+  }
+
+  static async getClimateSpatialLevelList() {
+    const url = `${serverUrl}/climate_sp_lvls`
+    const response = await axios.get(url)
+    return response.data
+  }
+
+  static async getClimateTimeStampsList() {
+    const url = `${serverUrl}/climate_time_stamp_list`
+    const response = await axios.get(url)
+    return response.data
+  }
+
+  static async getStations() {
+    const url = `${serverUrl}/stations`
+    const response = await axios.get(url)
+    return response.data
+
+  }
+
+  static async getClimateVariablesList() {
+    const url = `${serverUrl}/climate_vars`
+    const response = await axios.get(url)
+    return response.data
+
+  }
 }

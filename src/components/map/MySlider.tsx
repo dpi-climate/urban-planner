@@ -8,6 +8,7 @@ interface MySliderProps {
   max: number
   step: number
   initialValue: number
+  title: string
   onChange: (value: number) => void
 }
 
@@ -28,17 +29,18 @@ function MySlider(props: MySliderProps) {
       }}
       onPointerEnter={() => props.setControlDrag(false)}
       onPointerLeave={() => {props.setControlDrag(true)}}
-    > Opacity
+    > {props.title}
       <Slider
         min={props.min}
         max={props.max}
+        // value={props.value}
         defaultValue={props.initialValue}
         step={props.step}
         size="small"
-        // onChange={handleChange}
         onChangeCommitted={handleChange}
         aria-label="Small"
         valueLabelDisplay="auto"
+
       />
     </Box>
   )

@@ -13,6 +13,9 @@ import CloseIcon from '@mui/icons-material/Close'
 import SettingsIcon from '@mui/icons-material/Settings'
 import LayersIcon from '@mui/icons-material/Layers'
 import EvStationIcon from '@mui/icons-material/EvStation'
+import CloudIcon from '@mui/icons-material/Cloud'
+import WbSunnyIcon from '@mui/icons-material/WbSunny'
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 
 // Import types
 import { DrawerWrapperProps } from '../../types-and-interfaces/interfaces'
@@ -29,14 +32,17 @@ const Buttons: React.FC<{
         let icon
 
         switch (label) {
-          case "Layers":
-            icon = <LayersIcon/>
+          case "Climate":
+            icon = <WbSunnyIcon/>
             break
           case "EV-Stations":
             icon = <EvStationIcon/>
             break
           case 'Home':
             icon = <HomeIcon />
+            break
+          case 'People':
+            icon = <PeopleAltIcon />
             break
           case 'Settings':
             icon = <SettingsIcon />
@@ -45,7 +51,8 @@ const Buttons: React.FC<{
             icon = <InfoIcon />
             break
           default:
-            icon = <HomeIcon />
+            // icon = <HomeIcon />
+            icon = <LayersIcon/>
         }
 
         return (
@@ -162,15 +169,31 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
     }
   }
 
+  // useEffect(() => {
+  //   if (props.clickedLocal) {
+  //     setIsOpen(true)
+  //     if (props.setBtn) props.setBtn(props.clickedLocal)
+  //   } else {
+  //     setIsOpen(false)
+  //     if (props.setClickedLocal) {
+  //       // props.setClickedLocal(null)
+  //       props.setClickedLocal(
+  //   props.clickedLocal ? JSON.stringify(props.clickedLocal) : null
+  // );
+  //     }
+  //   }
+  // }, [props.clickedLocal, props.setClickedLocal, props.setBtn])
+
   useEffect(() => {
     if (props.clickedLocal) {
-      setIsOpen(true)
-      if (props.setBtn) props.setBtn(props.clickedLocal)
+      setIsOpen(true);
+      if (props.setBtn) props.setBtn(props.clickedLocal);
     } else {
-      setIsOpen(false)
-      if (props.setClickedLocal) props.setClickedLocal(null)
+      setIsOpen(false);
+      if (props.setClickedLocal) props.setClickedLocal(null);
     }
-  }, [props.clickedLocal, props.setClickedLocal, props.setBtn])
+  }, [props.clickedLocal, props.setClickedLocal, props.setBtn]);
+  
 
   return (
     <div style={{ position: 'relative' }}>
@@ -216,8 +239,8 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
             overflowY: 'auto',
             overflowX: 'hidden',
             padding: 0.5,
-            marginTop: props.anchor === 'top' ? '48px' : 0, // Adjust margin if needed
-            marginBottom: props.anchor === 'bottom' ? '48px' : 0, // Adjust margin if needed
+            marginTop: props.anchor === 'top' ? '48px' : 0,
+            marginBottom: props.anchor === 'bottom' ? '48px' : 0,
           }}
         >
           {props.children}

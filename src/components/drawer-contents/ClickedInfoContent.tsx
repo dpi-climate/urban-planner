@@ -2,16 +2,27 @@ import React from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Paper from '@mui/material/Paper'
+
+// Icons
+import InfoIcon from '@mui/icons-material/Info'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 
+// Interfaces
 import { InfoContentProps } from '../../types-and-interfaces/interfaces'
 
+// Charts
 import BarChart from '../bar-chart/BarChartZoom'
 import LineChart from '../line-chart/LineChart'
+
+// Risk Legend
 import CircleLegend from '../circle-legend/CircleLegend'
 
-
-// import { BAR_CHART_DATA, LINE_CHART_DATA } from '../../consts/consts'
+// Table
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableRow from '@mui/material/TableRow'
 
 const title = ""//"Local Info"
 const subtitle = ""
@@ -19,40 +30,22 @@ const subtitle = ""
 const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
 
   const legendItems = [
-    // { label: "2-year return period: Frequent Event", color: "#A8D5BA" },
-    // { label: "5-year return period: Design Event", color: "#4A90E2" },
-    // { label: "10-year return period: Moderate Risk Event", color: "#F8E71C" },
-    // { label: "25-year return period: Critical Design Event", color: "#F5A623" },
-    // { label: "50-year return period: Long-term Risk Event", color: "#9013FE" },
-    // { label: "100-year return period: Extreme Design Event", color: "#D0021B" },
-    // { label: "200-year return period: Extreme Rare Event", color: "#660000" },
-    // { label: "500-year return period: Catastrophic Event", color: "#000000" },
+    { label: "2-year: Percentage risk for the selected location to experience frequent flooding (50% annual chance)", color: "#0A8C00" },
+    { label: "5-year: Percentage risk for the selected location to experience flooding equivalent to design flood event (20% annual chance)", color: "#00CC6F" },
+    { label: "10-year: Percentage risk for the selected location to experience moderate flood risk (10% annual chance)", color: "#BBBE00" },
+    { label: "25-year: Percentage risk for the selected location to experience critical design flood event (4% annual chance)", color: "#FAFF00" },
+    { label: "50-year: Percentage risk for the selected location to experience long-term risk like flood event (2% annual chance)", color: "#fee600" },
+    { label: "100-year: Percentage risk for the selected location to experience extreme flood event (1% annual chance)", color: "#FF9E50" },
+    { label: "200-year: Percentage risk for the selected location to experience extreme rare flood event (0.5% annual chance)", color: "#FE0000" },
+    { label: "500-year: Percentage risk for the selected location to experience catastrophic event such as dam/flood wall failure (0.2% annual chance)", color: "#000000" },
+  ]
 
-  //   { label: "2-year return period: Frequent Event", color: "#0A8C00" },
-  //   { label: "5-year return period: Design Event", color: "#00CC6F" },
-  //   { label: "10-year return period: Moderate Risk Event", color: "#BBBE00" },
-  //   { label: "25-year return period: Critical Design Event", color: "#FAFF00" },
-  //   { label: "50-year return period: Long-term Risk Event", color: "#fee600" },
-  //   { label: "100-year return period: Extreme Design Event", color: "#FF9E50" },
-  //   { label: "200-year return period: Extreme Rare Event", color: "#FE0000" },
-  //   { label: "500-year return period: Catastrophic Event", color: "#000000" },
-
-  { label: "2-year: Frequent Event", color: "#0A8C00" },
-  { label: "5-year: Design Event", color: "#00CC6F" },
-  { label: "10-year: Moderate Risk Event", color: "#BBBE00" },
-  { label: "25-year: Critical Design Event", color: "#FAFF00" },
-  { label: "50-year: Long-term Risk Event", color: "#fee600" },
-  { label: "100-year: Extreme Design Event", color: "#FF9E50" },
-  { label: "200-year: Extreme Rare Event", color: "#FE0000" },
-  { label: "500-year: Catastrophic Event", color: "#000000" },
-]
-  // ]
 
   const renderCircleLegend = () => {
     if(props.riskData.length > 0) {
       return (
         <Box>
-          <CircleLegend items={legendItems} width={300} height={300} />
+          <CircleLegend items={legendItems} width={1000} height={300} />
         </Box>
       )
     }
@@ -81,8 +74,7 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
               }}
             />
           </Box> */}
-          <Box>
-            {/* <Typography variant="body2"><strong>Elevation:</strong> {props.clickedLocal.elevation?.toFixed(2)} m</Typography> */}
+          <Box sx={{ minWidth: "150px"}}>
             <Typography variant="body2"><strong>Latitude:</strong> {props.clickedLocal.lat.toFixed(2)}°</Typography>
             <Typography variant="body2"><strong>Longitude:</strong> {props.clickedLocal.lng.toFixed(2)}°</Typography>
           </Box>
@@ -101,13 +93,44 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
     if(props.riskData.length > 0) {
       return (
         <Box>
-          <LineChart data={props.riskData} width={400} height={200} xAxisLabel="Return period (years)" yAxisLabel="Risk" />
+          <LineChart data={props.riskData} width={400} height={200} xAxisLabel="Return period (years)" yAxisLabel="Flooding Risk (%)" />
         </Box>
       )
     } else {
-      return <></>
+      return null
     }
   }
+
+  const renderSocioInfo = () => {
+    return (
+      <>
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{
+            marginTop: 0.5,
+            borderRadius: 2,
+            maxWidth: '400px', // Limit the width of the table
+            // margin: '0 auto', // Center the table horizontally
+          }}
+        >
+          <Table size="small">
+            <TableBody>
+              {props.socioInfo.map((info, i) => (
+                <TableRow key={`socio-info-${i}`}>
+                  <TableCell component="th" scope="row">
+                    <strong>{info.name}</strong>
+                  </TableCell>
+                  <TableCell align="left">{info.value}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+      </>
+    );
+  };
 
   return (
     <Box sx={{ padding: 0.5 }}>
@@ -116,23 +139,59 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
         <Typography variant="subtitle1">{subtitle}</Typography>
       )}
       <Paper
-          elevation={0}
-          sx={{
-            padding: 2,
-            marginTop: 0.5,
-            borderRadius: 2,
-            display: 'flex',
-            // alignItems: 'center',
-            alignItems: 'start',
-          }}
-        >
+        elevation={0}
+        sx={{
+          padding: 1,
+          marginTop: 0.5,
+          borderRadius: 2,
+          display: 'flex',
+          // flexDirection: 'column',
+          alignItems: 'start',
+        }}
+      >
+        {renderPointInfo()}
+        {renderLineChart()}
+        {renderCircleLegend()}
+      </Paper>
 
-      { renderPointInfo() }
-      { renderLineChart() }
-      { renderCircleLegend() }
+      {/* <Paper
+        elevation={0}
+        sx={{
+          padding: 1, // Reduce padding to minimize vertical space
+          marginTop: 0.5, // Space above the first Paper
+          borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column', // Ensure content stacks vertically if needed
+          alignItems: 'start',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {renderPointInfo()}
+        </Box>
+        {props.riskData.length > 0 && (
+          <Box sx={{ marginTop: 1 }}>{renderLineChart()}</Box>
+        )}
+        {props.riskData.length > 0 && (
+          <Box sx={{ marginTop: 1 }}>{renderCircleLegend()}</Box>
+        )}
+      </Paper> */}
 
-        </Paper>
+
+      <Paper
+        elevation={0}
+        sx={{
+          padding: 1,
+          // marginTop: 0.2, // Reduced space between the Papers
+          borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'start',
+        }}
+      >
+        {renderSocioInfo()}
+      </Paper>
     </Box>
+
   )
 }
 

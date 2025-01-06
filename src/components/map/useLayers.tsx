@@ -1,45 +1,65 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { ScatterplotLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers"
 import { Layer } from "@deck.gl/core"
 import { DataLoader } from "../../data-loader/DataLoader"
 
 interface IUseLayersParams {
-  variable: string
+  variable: string | null
   year: string
   spatialLevel: string
   zoom: number
   showStations: boolean
   opacity: number
+  boundOpacity: number
+  boundaryId: string
+  setSocioInfo: React.Dispatch<
+    React.SetStateAction<{ name: string; value: number}[]>>
 }
 
 // Simplified data types
 interface IPointData {
   positions: number[]
-  colors: number[]
+  // colors: number[]
+  colors: Uint8Array
   length: number
   ids: string[]
   values: number[]
 }
 
 interface IPolygonData {
-  tracts: Array<{
-    GEOID: string
-    average_value: number
+  features: Array<{
+    UNITID: string
+    value: number
     color: [number, number, number, number]
+    geometry: GeoJSON.Geometry
+  }>
+}
+
+interface IBoundaryData {
+  features: Array<{
+    UNITID: string
     geometry: GeoJSON.Geometry
   }>
 }
 
 // If your stations are in a custom shape, adapt accordingly
 interface IStationFeature {
-  geometry: {
-    type: 'Point'
-    coordinates: [number, number]
-  }
-  properties: {
-    stationName: string
-    // other props
-  }
+  // geometry: {
+  //   type: 'Point'
+  //   coordinates: [number, number]
+  // }
+  // properties: {
+  //   stationName: string
+  //   // other props
+  // }
+  // features: any
+  features: {
+    geometry: {
+      type: 'Point',
+      coordinates: [number, number]
+    }[]
+  }[]
+  type: "FeatureCollection"
 }
 
 export default function useLayers({
@@ -48,37 +68,34 @@ export default function useLayers({
   spatialLevel,
   zoom,
   showStations,
-  opacity
+  opacity,
+  boundOpacity,
+  boundaryId,
+  setSocioInfo
 }: IUseLayersParams): Layer[] {
   const [pointData, setPointData] = useState<IPointData | null>(null)
   const [polygonData, setPolygonData] = useState<IPolygonData | null>(null)
-  const [stations, setStations] = useState<IStationFeature[]>([])
+  const [stations, setStations] = useState<IStationFeature | null>(null)
+  const [boundaryData, setBoundaryData] = useState<IBoundaryData | null>(null)
 
-  useEffect(() => {
-    async function loadStations() {
-      const stationData = await DataLoader.getStations()
-      setStations(stationData)
-    }
-
-    loadStations()
-  }, [])
-
-  useEffect(() => {
+  const updateClimateLayers = useCallback(() => {
     if (!variable || !year || spatialLevel === null) return
 
     let isMounted = true
     ;(async () => {
       try {
         const data = await DataLoader.getPointLayerData(variable, year, spatialLevel)
-        if (!isMounted) return
+        console.log(data)
+        if (!isMounted || data === null) return
 
-        if (spatialLevel === "") {
+        if (spatialLevel === "pt") {
           setPolygonData(null)
-          setPointData(data)
+          setPointData(data as unknown as IPointData)
 
-        } else if (spatialLevel === "ct") {
+        // } else if (spatialLevel === "ct" || spatialLevel === "bg") {
+        } else {
           setPointData(null)
-          setPolygonData(data)
+          setPolygonData(data as IPolygonData)
         }
       } catch (error) {
         console.error("Error fetching polygon data:", error)
@@ -92,7 +109,51 @@ export default function useLayers({
     return () => {
       isMounted = false
     }
-  }, [variable, year, spatialLevel])
+  },[variable, year, spatialLevel, setPointData, setPolygonData])
+  
+  useEffect(() => {
+    async function loadStations() {
+      const stationData = await DataLoader.getStations()
+      setStations(stationData)
+    }
+
+    loadStations()
+  }, [])
+
+  useEffect(() => {
+    if (!boundaryId) return
+    
+    if (boundaryId === "None") {
+      setBoundaryData(null)
+
+    } else {
+      let isMounted = true
+  
+      ;(async () => {
+        try {
+          const data = await DataLoader.getBoundary(boundaryId)
+
+          if (!isMounted || data === null) return
+          // console.log(data)
+          setBoundaryData(data)
+
+        } catch (error) {
+          console.error("Error fetching polygon data:", error)
+          
+          if (isMounted) {
+            setBoundaryData(null)
+          }
+        }
+      })()
+
+      return () => {
+        isMounted = false
+      }
+    }
+
+  },[boundaryId])
+
+  useEffect(() => updateClimateLayers(), [updateClimateLayers])
 
   const radiusScale = useMemo(() => {
     if (zoom <= 6) return 1
@@ -125,27 +186,27 @@ export default function useLayers({
       radiusMinPixels: 1,
       radiusMaxPixels: 500,
       opacity: opacity,
-      pickable: true,
-      onClick: (info) => {
-        const index = info.index;
-        const value = pointData.values[index];
-        const cl = pointData.colors[index];
-        console.log(`Value: ${value !== null ? value : 'N/A'}, ${cl}`);
-      }
+      pickable: false,
+      // onClick: (info) => {
+      //   const index = info.index;
+      //   const value = pointData.values[index];
+      //   const cl = pointData.colors[index];
+      //   console.log(`Value: ${value !== null ? value : 'N/A'}, ${cl}`);
+      // }
     })
-  }, [pointData, radiusScale, variable, year])
+  }, [pointData, radiusScale, variable, year, opacity])
 
   const polygonLayer = useMemo(() => {
     if (!polygonData) return null
 
-    function toGeoJSON(tractData: IPolygonData) {
+    function toGeoJSON(tractData: IPolygonData): GeoJSON.FeatureCollection {
       return {
         type: "FeatureCollection",
-        features: tractData.tracts.map((t) => ({
+        features: tractData.features.map((t) => ({
           type: "Feature",
           properties: {
-            GEOID: t.GEOID,
-            average_value: t.average_value,
+            UNITID: t.UNITID,
+            value: t.value,
             color: t.color,
           },
           geometry: t.geometry,
@@ -158,24 +219,24 @@ export default function useLayers({
       data: toGeoJSON(polygonData),
       filled: true,
       stroked: true,
-      // getFillColor: (f) => f.properties.color,
       getFillColor: (f) => {
         const [r, g, b, a] = f.properties.color
         return [r, g, b, Math.floor(a * opacity)]
       },
-      getLineColor: [0, 0, 0, 255],
-      // opacity: opacity,
+      getLineColor: () => [0, 0, 0, Math.floor(150 * boundOpacity)],
       lineWidthMinPixels: 1,
-      pickable: false,
+      pickable: true,
+      highlightColor: [255, 255, 255, 128],
+      autoHighlight: true, 
+      onClick: (info) => { handleClick(info.object.properties.UNITID)}
     })
-  }, [polygonData, variable, year, opacity])
+  }, [polygonData, variable, year, opacity, boundOpacity])
 
   const stationLayer = useMemo(() => {
     if (!showStations || !stations || !stations.features || !stations.features.length) {
-      return null;
+      return null
     }
-  
-    // 2. Create the IconLayer using `stations.features`
+
     return new IconLayer({
       id: 'station-layer',
       data: stations.features,
@@ -200,21 +261,72 @@ export default function useLayers({
     });
   }, [stations, showStations]);
 
+  const boundaryLayer = useMemo(() => {
+    if (!boundaryData) return null
+
+    function toGeoJSON(tractData: IPolygonData): GeoJSON.FeatureCollection {
+      return {
+        type: "FeatureCollection",
+        features: tractData.features.map((t) => ({
+          type: "Feature",
+          properties: {
+            UNITID: t.UNITID,
+          },
+          geometry: t.geometry,
+        })),
+      }
+    }
+
+    return new GeoJsonLayer({
+      id: `geojson-layer-${boundaryId}`,
+      data: toGeoJSON(boundaryData),
+      filled: true,
+      getFillColor: () => [255, 255, 255, 0],
+      stroked: true,
+      getLineColor: () => [60, 60, 60, Math.floor(150 * boundOpacity)],
+      lineWidthMinPixels: 1,
+      pickable: boundaryId === "None",
+      // highlightColor: [0, 255, 0, 128], // Green with transparency for hover highlight
+      highlightColor: [255, 255, 255, 128],
+      autoHighlight: boundaryId === "None",
+      onClick: (info) => { handleClick(info.object.properties.UNITID)}
+
+    })
+  }, [boundaryData, boundaryId, boundOpacity])
+
+  const handleClick = async (unitId: string) => {
+    const unitInfo = await DataLoader.getSocioDataById(unitId, "ct")
+    setSocioInfo(unitInfo)
+  }
+
   return useMemo(() => {
     const layers: Layer[] = []
 
-    if (spatialLevel === "ct" && polygonLayer) {
+    // if (spatialLevel === "ct" && polygonLayer) {
+    //   layers.push(polygonLayer)
+    // }
+
+    // else if (spatialLevel === "pt" && pointLayer) {
+    //   layers.push(pointLayer)
+    // }
+
+    if (polygonLayer) {
       layers.push(polygonLayer)
     }
 
-    else if (spatialLevel === "" && pointLayer) {
+    else if (pointLayer) {
       layers.push(pointLayer)
+    }
+
+    if(boundaryLayer) {
+      layers.push(boundaryLayer)
     }
 
     if (stationLayer) {
       layers.push(stationLayer)
     }
 
+
     return layers
-  }, [spatialLevel, polygonLayer, pointLayer, stationLayer])
+  }, [spatialLevel, polygonLayer, pointLayer, stationLayer, boundaryLayer])
 }
