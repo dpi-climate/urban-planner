@@ -47,9 +47,9 @@ const Home = () => {
   const drawerBtns = ["Climate", "EV-Stations", "People"]
   
   // Stations
-  const [showStations, setShowStations] = useState<boolean>(false)
+  const [showStations, setShowStations] = useState<boolean>(true)
   // const drawerBtns = ["Layers", "Home"]
-
+  const [activeStation, setStation] = useState<string | null>(null)
 
   const [clickedLocal, setClickedLocal] = useState<{lat:number, lng: number, elevation: number | null} | null>(null)
 
@@ -104,11 +104,23 @@ const Home = () => {
 
   }
 
-  const updateRiskData = async (ptIdx: number | [number, number] | null, elevation: number | null) => {
-    if(ptIdx) {
-      const _riskData = await DataLoader.getRiskData(ptIdx)
-      // setClickedLocal({ lat: ptIdx[0], lng: ptIdx[1], elevation: elevation })
+  // const updateRiskData = async (ptIdx: number | [number, number] | null, elevation: number | null) => {
+  //   if(ptIdx) {
+  //     const _riskData = await DataLoader.getRiskData(ptIdx)
+  //     // setClickedLocal({ lat: ptIdx[0], lng: ptIdx[1], elevation: elevation })
+  //     setRiskData(_riskData)
+  //   }
+  // }
+
+  const updateRiskData = async (lat: number | null, lon: number | null, name: string | null) => {
+    if(lat && lon && name) {
+      const _riskData = await DataLoader.getRiskData(lat, lon)
       setRiskData(_riskData)
+      setStation(name)
+      
+    } else {
+      setRiskData([])
+      setStation(null)
     }
   }
 
@@ -276,8 +288,11 @@ const Home = () => {
     return (
       <DrawerWrapper 
         anchor={"bottom"} 
-        clickedLocal={clickedLocal} 
-        setClickedLocal={setClickedLocal}>
+        // clickedLocal={clickedLocal} 
+        // setClickedLocal={setClickedLocal}
+        clickedLocal={activeStation} 
+        setClickedLocal={setStation}
+        >
         
         <ClickedInfoContent 
           clickedLocal={clickedLocal}

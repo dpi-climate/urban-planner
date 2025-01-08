@@ -48,6 +48,9 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
             label={props.variables[props.variableIdx].name}
             onChange={(event: SelectChangeEvent) => props.updateLayer(parseInt(event.target.value), null, null)}
           >
+            <MenuItem value="" disabled={props.variableIdx === null}>
+              <em>None</em>
+            </MenuItem>
             {
               props.variables.map((obj: {name: string, id: string}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
             }

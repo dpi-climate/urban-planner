@@ -67,7 +67,8 @@ const useMapClick = (props: UseMapClickProps) => {
         }
 
         setClickedLocal({ lat, lng, elevation })
-        props.updateRiskData([lat, lng], elevation)
+        // props.updateRiskData([lat, lng], elevation)
+        props.updateRiskData(lat, lng)
           
         if (!marker) {
           const newMarker = new mapboxgl.Marker({

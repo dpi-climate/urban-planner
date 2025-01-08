@@ -13,7 +13,8 @@ interface IUseLayersParams {
   boundOpacity: number
   boundaryId: string
   activeSection: string,
-  socioVariable: string
+  socioVariable: string,
+  updateRiskData: (lat: number, lon: number, name: string) => void
   setSpatialLevel: React.Dispatch<
   React.SetStateAction<string>>
 
@@ -21,7 +22,6 @@ interface IUseLayersParams {
     React.SetStateAction<{ name: string; value: number}[]>>
 }
 
-// Simplified data types
 interface IPointData {
   positions: number[]
   // colors: number[]
@@ -47,7 +47,6 @@ interface IBoundaryData {
   }>
 }
 
-// If your stations are in a custom shape, adapt accordingly
 interface IStationFeature {
   // geometry: {
   //   type: 'Point'
@@ -79,7 +78,8 @@ export default function useLayers({
   activeSection,
   setSocioInfo,
   setSpatialLevel,
-  socioVariable
+  socioVariable,
+  updateRiskData
 }: IUseLayersParams): Layer[] {
   const [pointData, setPointData] = useState<IPointData | null>(null)
   const [polygonData, setPolygonData] = useState<IPolygonData | null>(null)
@@ -312,7 +312,7 @@ export default function useLayers({
       id: 'station-layer',
       data: stations.features,
   
-      iconAtlas: '/Electric_Charging_Station_Clean_Transparent.png',
+      iconAtlas: '/EV_Station.png',
       iconMapping: {
         marker: { x: 0, y: 0, width: 900, height: 900, mask: false },
       },
@@ -321,14 +321,14 @@ export default function useLayers({
       getIcon: () => 'marker',
       getSize: () => 4,
       sizeScale: 15,
-      pickable: false,
-      // onClick: (info) => {
-      //   // info.object will be your Feature, so you can access properties:
-      //   if (info.object) {
-      //     const stationName = info.object.properties?.stationName;
-      //     alert(`Clicked on station: ${stationName}`);
-      //   }
-      // },
+      pickable: true,
+      onClick: (info) => {
+        // console.log(info.object.geometry.coordinates)
+        const name = info.object.properties["Station Name"]
+        const lon = info.object.geometry.coordinates[0]
+        const lat = info.object.geometry.coordinates[1]
+        updateRiskData(lat, lon, name)
+      },
     });
   }, [stations, showStations]);
 

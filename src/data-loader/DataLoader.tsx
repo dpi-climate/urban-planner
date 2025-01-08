@@ -197,18 +197,11 @@ export abstract class DataLoader {
       }
     }
 
-  static async getRiskData(ptIdx: number | [number, number]) {
+  static async getRiskData(lat: number, lon: number) {
     const url = `${serverUrl}/risk_data`
-    let p = ptIdx
-    
-    const data = Array.isArray(ptIdx)
-      ? { params: { lat: ptIdx[0] , lon: ptIdx[1] } }
-      : { params: { pt_idx: ptIdx } }
-          
-      const response = await axios.get(url, data)
-    
-      return response.data
-
+    const data = { params: { lat, lon } } 
+    const response = await axios.get(url, data)
+    return response.data
   }
 
   static async getSocioDataById(id: string, level: string){

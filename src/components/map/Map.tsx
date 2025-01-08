@@ -73,14 +73,14 @@ const Map: React.FC<IMap> = (props) => {
 
   useEffect(() => startMap(), [startMap])
 
-  useMapClick({
-    map,
-    clickedLocal: props.clickedLocal,
-    variable: props.variable,
-    spatialLevel: props.spatialLevel,
-    setClickedLocal: props.setClickedLocal,
-    updateRiskData: props.updateRiskData
-  })
+  // useMapClick({
+  //   map,
+  //   clickedLocal: props.clickedLocal,
+  //   variable: props.variable,
+  //   spatialLevel: props.spatialLevel,
+  //   setClickedLocal: props.setClickedLocal,
+  //   updateRiskData: props.updateRiskData
+  // })
 
   const deckLayers = useLayers({
     variable: props.variable,
@@ -94,6 +94,7 @@ const Map: React.FC<IMap> = (props) => {
     opacity: props.opacity,
     boundOpacity: props.boundOpacity,
     boundaryId: props.boundaryId,
+    updateRiskData: props.updateRiskData,
     setSocioInfo:props.setSocioInfo
   })
 
