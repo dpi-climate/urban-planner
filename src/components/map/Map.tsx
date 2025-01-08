@@ -26,6 +26,10 @@ interface IMap {
   >
   clickedLocal: { lat: number; lng: number; elevation: number | null } | null
   boundaryId: string
+  
+  socioVariable: string
+  activeSection: "climate" | "socio"
+  updateSocioLayer: (varIdx: number | null, sIdx: number | null) => void
   updateRiskData: (ptIdx: number | [number, number], elevation: number | null) => void
   setSocioInfo: React.Dispatch<
   React.SetStateAction<{ name: string; value: number}[]>
@@ -82,6 +86,9 @@ const Map: React.FC<IMap> = (props) => {
     variable: props.variable,
     year: props.year,
     spatialLevel: props.spatialLevel,
+    activeSection: props.activeSection,
+    setSpatialLevel: props.setSpatialLevel,
+    socioVariable: props.socioVariable,
     zoom: currentZoom,
     showStations: props.showStations,
     opacity: props.opacity,

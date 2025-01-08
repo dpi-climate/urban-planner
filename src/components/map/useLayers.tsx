@@ -12,6 +12,11 @@ interface IUseLayersParams {
   opacity: number
   boundOpacity: number
   boundaryId: string
+  activeSection: string,
+  socioVariable: string
+  setSpatialLevel: React.Dispatch<
+  React.SetStateAction<string>>
+
   setSocioInfo: React.Dispatch<
     React.SetStateAction<{ name: string; value: number}[]>>
 }
@@ -71,7 +76,10 @@ export default function useLayers({
   opacity,
   boundOpacity,
   boundaryId,
-  setSocioInfo
+  activeSection,
+  setSocioInfo,
+  setSpatialLevel,
+  socioVariable
 }: IUseLayersParams): Layer[] {
   const [pointData, setPointData] = useState<IPointData | null>(null)
   const [polygonData, setPolygonData] = useState<IPolygonData | null>(null)
@@ -79,13 +87,13 @@ export default function useLayers({
   const [boundaryData, setBoundaryData] = useState<IBoundaryData | null>(null)
 
   const updateClimateLayers = useCallback(() => {
-    if (!variable || !year || spatialLevel === null) return
+    if (activeSection !== "climate" || !variable || !year || spatialLevel === null) return
 
     let isMounted = true
     ;(async () => {
       try {
         const data = await DataLoader.getPointLayerData(variable, year, spatialLevel)
-        console.log(data)
+
         if (!isMounted || data === null) return
 
         if (spatialLevel === "pt") {
@@ -110,6 +118,67 @@ export default function useLayers({
       isMounted = false
     }
   },[variable, year, spatialLevel, setPointData, setPolygonData])
+  
+  const updateClimateLayersZoom = useCallback(() => {
+    if (!variable || !year || spatialLevel === null) return
+
+    ;(async () => {
+      try {
+
+        let newSpatialLevel = "bg"
+
+        if (zoom < 6.6) {
+          newSpatialLevel = "pt"
+        
+        } else if (zoom < 7.8){
+          newSpatialLevel = "co"
+        
+        } else if(zoom < 10) {
+
+          newSpatialLevel = "ct"
+        
+        } else if(zoom < 12) {
+          newSpatialLevel = "bg"
+        }
+
+        if(newSpatialLevel !== spatialLevel) {
+          setSpatialLevel(newSpatialLevel)
+        }
+
+      } catch (error) {
+        console.error("Error fetching polygon data:", error)
+      }
+    })()
+
+  },[variable, year, spatialLevel, zoom, setPointData, setPolygonData])
+
+  const updateSocioLayers = useCallback(() => {
+    if (activeSection !== "socio" ||  !socioVariable || spatialLevel === null) return
+
+    let isMounted = true
+    ;(async () => {
+      try {
+
+        const data = await DataLoader.getSocioLayer(socioVariable, spatialLevel)
+
+        if (!isMounted || data === null) return
+
+          setPointData(null)
+          setPolygonData(data as IPolygonData)
+
+      } catch (error) {
+        console.error("Error fetching polygon data:", error)
+        if (isMounted) {
+          setPointData(null)
+          setPolygonData(null)
+        }
+      }
+    })()
+
+    return () => {
+      isMounted = false
+    }
+  },[socioVariable, spatialLevel, setPolygonData])
   
   useEffect(() => {
     async function loadStations() {
@@ -153,7 +222,9 @@ export default function useLayers({
 
   },[boundaryId])
 
+  useEffect(() => updateClimateLayersZoom(), [updateClimateLayersZoom])
   useEffect(() => updateClimateLayers(), [updateClimateLayers])
+  useEffect(() => updateSocioLayers(), [updateSocioLayers])
 
   const radiusScale = useMemo(() => {
     if (zoom <= 6) return 1
@@ -228,7 +299,7 @@ export default function useLayers({
       pickable: true,
       highlightColor: [255, 255, 255, 128],
       autoHighlight: true, 
-      onClick: (info) => { handleClick(info.object.properties.UNITID)}
+      onClick: (info) => { console.log(info.object.properties.value, info.object.properties.UNITID); handleClick(info.object.properties.UNITID)}
     })
   }, [polygonData, variable, year, opacity, boundOpacity])
 
@@ -295,20 +366,12 @@ export default function useLayers({
   }, [boundaryData, boundaryId, boundOpacity])
 
   const handleClick = async (unitId: string) => {
-    const unitInfo = await DataLoader.getSocioDataById(unitId, "ct")
-    setSocioInfo(unitInfo)
+    // const unitInfo = await DataLoader.getSocioDataById(unitId, "ct")
+    // setSocioInfo(unitInfo)
   }
 
   return useMemo(() => {
     const layers: Layer[] = []
-
-    // if (spatialLevel === "ct" && polygonLayer) {
-    //   layers.push(polygonLayer)
-    // }
-
-    // else if (spatialLevel === "pt" && pointLayer) {
-    //   layers.push(pointLayer)
-    // }
 
     if (polygonLayer) {
       layers.push(polygonLayer)

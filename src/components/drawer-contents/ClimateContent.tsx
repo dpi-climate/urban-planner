@@ -112,8 +112,8 @@ const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
 
       {renderVariableDropdown()}
       {renderTimeStamps()}
-      {renderSpatialLevelDropdown()}
-      {renderBoundariesDropdown()}
+      {/* {renderSpatialLevelDropdown()} */}
+      {/* {renderBoundariesDropdown()} */}
       
     </Box>
   )

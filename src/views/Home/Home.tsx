@@ -21,7 +21,11 @@ const Home = () => {
  
   // /////////////////////////////////////////////////////////////////////////////////
   // ////////////////   CLIMATE CONTENT   ////////////////////////////////////////////
+  
+  // Climate
   const initialIdx = 2
+  const initialOpacity = 0.8
+  const initialBoundOpacity = 0.5
   
   const [climateVarsList, setClimateVarsList] = useState<{name: string, id: string, colors: number[], domain: number[]}[]>([])
   const [climateVarsItems, setClimateVarsItems] = useState<{name: string, id: string}[]>([])
@@ -31,25 +35,39 @@ const Home = () => {
   const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
   const [variableIdx, setVariableIdx]   = useState<number>(initialIdx)
   const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(0)
+
+  const [unitLevel, setUnitLevel] = useState<string>("pt")
+  const [unitLevelList, setUnitLevelList] = useState<string[]>([])
   
+
+  // Risk
   const [riskData, setRiskData] = useState<{ year: string, value: number}[]>([])
   
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
   const drawerBtns = ["Climate", "EV-Stations", "People"]
+  
+  // Stations
+  const [showStations, setShowStations] = useState<boolean>(false)
   // const drawerBtns = ["Layers", "Home"]
 
-  const [showStations, setShowStations] = useState<boolean>(false)
 
   const [clickedLocal, setClickedLocal] = useState<{lat:number, lng: number, elevation: number | null} | null>(null)
 
   const [controlDrag, setControlDrag] = useState<boolean>(true)
-  const [opacity, setOpacity] = useState<number>(1.0)
-  const [boundOpacity, setBoundOpacity] = useState<number>(1.0)
+  const [opacity, setOpacity] = useState<number>(initialOpacity)
+  const [boundOpacity, setBoundOpacity] = useState<number>(initialBoundOpacity)
 
   const [boundariesList, setBoundariesList] = useState<{id: string, name: string }[]>([])
-  const [boundaryIdx, setBoundaryIdx] = useState<number>(1)
+  const [boundaryIdx, setBoundaryIdx] = useState<number>(0)
 
   const [socioInfo, setSocioInfo] = useState<{name: string, value: string}[]>([])
+  
+  const [socioSpatialLevelList, setSocioSpatialLevelList] = useState<string[]>(["co", "ct"])
+  const [socioVarIdx, setSocioVarIdx] = useState<number>(0)
+  const [socioVarsList, setSocioVarsList] = useState<{name: string, id: string, colors: number[], domain: number[]}[]>([])
+  const [socioVarsItems, setSocioVarsItems] = useState<{id: string, name: string }[]>([])
+
+  const [activeSection, setActiveSection] = useState<"climate" | "socio">("climate")
   
   // ////////////////   UPDATE FUNCTIONS   ///////////////////////////////////////////
 
@@ -60,9 +78,14 @@ const Home = () => {
         setRiskData([])
       }
       setVariableIdx(varIdx)
+      setActiveSection("climate")
     }
 
-    if(yIdx !== null)   setYearIdx(yIdx)
+    if(yIdx !== null)  {
+      setYearIdx(yIdx)
+      setActiveSection("climate")
+    }
+
     if(sIdx !== null)   {
       if (climateSpLvlList[sIdx].id !== "pt") {
         setBoundaryIdx(0)
@@ -71,6 +94,14 @@ const Home = () => {
       }
       setSpatialAggIdx(sIdx)
     }
+  }
+
+  const updateSocioLayer = (varIdx: number | null, sIdx: number | null) => {
+    if(varIdx !== null) {
+      setSocioVarIdx(varIdx)
+      setActiveSection("socio")
+    }
+
   }
 
   const updateRiskData = async (ptIdx: number | [number, number] | null, elevation: number | null) => {
@@ -95,11 +126,20 @@ const Home = () => {
 
       // Climate Spatial Levels
       const spLvlList = await DataLoader.getClimateSpatialLevelList()
+      const spIds = spLvlList.map((d: { id: string, name: string}) => d.id)
+
       setClimateSpLvlList(spLvlList)
+      setUnitLevelList(spIds)
 
       // Climate Time Stamps
       const climateTsmps = await DataLoader.getClimateTimeStampsList()
       setClimateTstampsList(climateTsmps)
+
+      // Socio
+      const socioVars = await DataLoader.getSocioVariablesList()
+      const socioIds = socioVars.map(({ colors, domain, ...rest }) => rest)
+      setSocioVarsList(socioVars)
+      setSocioVarsItems(socioIds)
 
       
     })()
@@ -133,6 +173,7 @@ const Home = () => {
               boundaryIdx={boundaryIdx}
               boundariesList={boundariesList}
               
+              setActiveSection={setActiveSection}
               setBoundOpacity={setBoundOpacity}
               updateLayer={updateLayer}
               setBoundaryIdx={setBoundaryIdx}
@@ -145,8 +186,11 @@ const Home = () => {
               />}
               {activeDrawerBtn === 'People' && 
               <PeopleContent 
-                // showStations={showStations}
-                // setShowStations={setShowStations}
+              socioVariables={socioVarsItems}
+              socioVarIdx={socioVarIdx}
+              setSocioVarIdx={setSocioVarIdx}
+              updateSocioLayer={updateSocioLayer}
+ 
               />}
               
         </DrawerWrapper>
@@ -159,21 +203,25 @@ const Home = () => {
   }
 
   const renderColorMapWrapper = () => {
-    if(climateVarsItems.length > 0 && climateVarsList.length > 0 && climateTstampsList.length > 0) {
+    if(climateVarsList.length > 0 && climateTstampsList.length > 0) {
+      let arr = activeSection === "climate"
+        ? climateVarsList
+        : socioVarsList
+
       return (
         <ColorBarWrapper display={() => variableIdx && yearIdx ? "block" : "none"} controlDrag={controlDrag} >
-          <Row key={`row-map-legend-${climateVarsItems[variableIdx].id}-${climateTstampsList[yearIdx]}`} style={{ marginTop:"5px" }}>
+          <Row key={`row-map-legend-${arr[variableIdx].id}-${climateTstampsList[yearIdx]}`} style={{ marginTop:"5px" }}>
             <ColorBar 
-              colorScheme={climateVarsList[variableIdx].colors} 
-              legId= {`${climateVarsItems[variableIdx].id}`} 
-              domain= {climateVarsList[variableIdx].domain} 
-              label={`${climateVarsItems[variableIdx].name}`}/>
+              colorScheme={arr[variableIdx].colors} 
+              legId= {`${arr[variableIdx].id}`} 
+              domain= {arr[variableIdx].domain} 
+              label={`${arr[variableIdx].name}`}/>
           </Row>
           <Row key="row-opacity" style={{ marginTop:"5px" }}>
-            <MySlider title="Fill opacity"initialValue={1.0} min={0.0} max={1.0} step={0.1} setControlDrag={setControlDrag} onChange={setOpacity}/>
+            <MySlider title="Fill opacity"initialValue={initialOpacity} min={0.0} max={1.0} step={0.1} setControlDrag={setControlDrag} onChange={setOpacity}/>
           </Row>
           <Row key="row-boundary-opacity" style={{ marginTop:"5px" }}>
-            <MySlider title="Boundary opacity" initialValue={1.0} min={0.0} max={1.0} step={0.1} setControlDrag={setControlDrag} onChange={setBoundOpacity}/>
+            <MySlider title="Boundary opacity" initialValue={initialBoundOpacity} min={0.0} max={1.0} step={0.1} setControlDrag={setControlDrag} onChange={setBoundOpacity}/>
           </Row>
         </ColorBarWrapper>
       )
@@ -193,15 +241,19 @@ const Home = () => {
           zoom={6}
           variable={climateVarsItems.length > 0 ? climateVarsItems[variableIdx].id : null}
           year={climateTstampsList.length > 0 ? climateTstampsList[yearIdx] : null}
+          socioVariable={socioVarsItems.length > 0 ? socioVarsItems[socioVarIdx].id : null}
           showStations={showStations}
-          spatialLevel={climateSpLvlList.length > 0 ? climateSpLvlList[spatialAggIdx].id : null}
+          spatialLevel={unitLevel}//{climateSpLvlList.length > 0 ? climateSpLvlList[spatialAggIdx].id : null}
+          setSpatialLevel={setUnitLevel}
           clickedLocal={clickedLocal}
           opacity={opacity}
           boundOpacity={boundOpacity}
           boundaryId={boundariesList.length > 0 ? boundariesList[boundaryIdx].id : "None"}
+          activeSection={activeSection}
           setSocioInfo={setSocioInfo}
           setClickedLocal={setClickedLocal}
           updateRiskData={updateRiskData}
+          updateSocioLayer={updateSocioLayer}
         />
       </ElementWrapper>
     )

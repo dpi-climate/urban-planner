@@ -218,6 +218,77 @@ export abstract class DataLoader {
 
   }
 
+  static async getSocioLayer(varId: string, sLevel: string) {
+    const url = `${serverUrl}/socio_layer`
+    
+    const response = await axios.get(url, {
+      params: { var_name: varId, s_agg: sLevel },
+      responseType: 'arraybuffer',
+    })
+
+    const buffer = response.data
+    const dataView = new DataView(buffer);
+      
+      let offset = 0;
+    
+      // 1) number of features
+      const numFeatures = dataView.getUint32(offset, true);
+      offset += 4;
+    
+      const features = [];
+    
+      for (let i = 0; i < numFeatures; i++) {
+        // 2a) GEOID length
+        const geoIdLen = dataView.getUint32(offset, true);
+        offset += 4;
+    
+        // 2b) GEOID bytes
+        const geoIdBytes = new Uint8Array(buffer, offset, geoIdLen);
+        offset += geoIdLen;
+        const geoId = new TextDecoder("utf-8").decode(geoIdBytes);
+    
+        // 2c) average_value (float32)
+        const avgVal = dataView.getFloat32(offset, true);
+        offset += 4;
+    
+        // 2d) color (4 bytes)
+        const r = dataView.getUint8(offset);
+        const g = dataView.getUint8(offset + 1);
+        const b = dataView.getUint8(offset + 2);
+        const a = dataView.getUint8(offset + 3);
+        offset += 4;
+    
+        // 2e) geometry JSON length
+        const geomLen = dataView.getUint32(offset, true);
+        offset += 4;
+    
+        // 2f) geometry bytes
+        const geomBytes = new Uint8Array(buffer, offset, geomLen);
+        offset += geomLen;
+    
+        // parse geometry
+        const geomStr = new TextDecoder("utf-8").decode(geomBytes);
+        const geometry = JSON.parse(geomStr);
+    
+        features.push({
+          UNITID: geoId,
+          value: avgVal,
+          color: [r, g, b, a],
+          geometry: geometry,
+        });
+      }
+    
+      return { features }
+
+
+  }
+
+  static async getSocioVariablesList() {
+    const url = `${serverUrl}/socio_vars`
+    const response = await axios.get(url)
+    return response.data
+  }
+
   static async getClimateSpatialLevelList() {
     const url = `${serverUrl}/climate_sp_lvls`
     const response = await axios.get(url)
