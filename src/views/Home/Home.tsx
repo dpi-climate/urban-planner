@@ -16,6 +16,7 @@ import { Row } from "react-bootstrap"
 import ColorBar from "../../components/map/ColorBar"
 
 import MySlider from "../../components/map/MySlider"
+import { StationType } from "../../types-and-interfaces/types"
 
 const Home = () => {
  
@@ -26,6 +27,8 @@ const Home = () => {
   const initialIdx = 2
   const initialOpacity = 0.8
   const initialBoundOpacity = 0.5
+
+  // const stationTypes = ["electric", "biodiesel", "ethanol", "cng", "lng"]
   
   const [climateVarsList, setClimateVarsList] = useState<{name: string, id: string, colors: number[], domain: number[]}[]>([])
   const [climateVarsItems, setClimateVarsItems] = useState<{name: string, id: string}[]>([])
@@ -33,7 +36,7 @@ const Home = () => {
   const [climateTstampsList, setClimateTstampsList] = useState<number[]>([])
 
   const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
-  const [variableIdx, setVariableIdx]   = useState<number>(initialIdx)
+  const [variableIdx, setVariableIdx]   = useState<number>(1)
   const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(0)
 
   const [unitLevel, setUnitLevel] = useState<string>("pt")
@@ -44,10 +47,13 @@ const Home = () => {
   const [riskData, setRiskData] = useState<{ year: string, value: number}[]>([])
   
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
-  const drawerBtns = ["Climate", "EV-Stations", "People"]
+  const drawerBtns = ["Climate", "Structure", "People"]
   
   // Stations
   const [showStations, setShowStations] = useState<boolean>(true)
+  const [activeStations, setStations] = useState<StationType[]>(["electric", "biodiesel", "ethanol", "cng", "lng", "lpg"])
+
+
   // const drawerBtns = ["Layers", "Home"]
   const [activeStation, setStation] = useState<string | null>(null)
 
@@ -190,10 +196,12 @@ const Home = () => {
               updateLayer={updateLayer}
               setBoundaryIdx={setBoundaryIdx}
               />}
-            {activeDrawerBtn === 'EV-Stations' && 
+            {activeDrawerBtn === 'Structure' && 
             <EVContent 
               showStations={showStations}
               setShowStations={setShowStations}
+              activeStations={activeStations}
+              setStations={setStations}
               
               />}
               {activeDrawerBtn === 'People' && 
@@ -262,6 +270,7 @@ const Home = () => {
           boundOpacity={boundOpacity}
           boundaryId={boundariesList.length > 0 ? boundariesList[boundaryIdx].id : "None"}
           activeSection={activeSection}
+          activeStations={activeStations}
           setSocioInfo={setSocioInfo}
           setClickedLocal={setClickedLocal}
           updateRiskData={updateRiskData}

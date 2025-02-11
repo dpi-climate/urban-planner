@@ -16,6 +16,7 @@ import EvStationIcon from '@mui/icons-material/EvStation'
 import CloudIcon from '@mui/icons-material/Cloud'
 import WbSunnyIcon from '@mui/icons-material/WbSunny'
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
 
 // Import types
 import { DrawerWrapperProps } from '../../types-and-interfaces/interfaces'
@@ -35,8 +36,8 @@ const Buttons: React.FC<{
           case "Climate":
             icon = <WbSunnyIcon/>
             break
-          case "EV-Stations":
-            icon = <EvStationIcon/>
+          case "Structure":
+            icon = <LocationCityIcon/>
             break
           case 'Home':
             icon = <HomeIcon />

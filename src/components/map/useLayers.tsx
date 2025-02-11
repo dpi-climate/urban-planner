@@ -2,8 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { ScatterplotLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers"
 import { Layer } from "@deck.gl/core"
 import { DataLoader } from "../../data-loader/DataLoader"
+import wellknown from "wellknown";
+import { StationType } from "../../types-and-interfaces/types";
 
 interface IUseLayersParams {
+  activeStations: StationType[]
   variable: string | null
   year: string
   spatialLevel: string
@@ -14,6 +17,7 @@ interface IUseLayersParams {
   boundaryId: string
   activeSection: string,
   socioVariable: string,
+  allowedTypes: string[],
   updateRiskData: (lat: number, lon: number, name: string) => void
   setSpatialLevel: React.Dispatch<
   React.SetStateAction<string>>
@@ -67,6 +71,7 @@ interface IStationFeature {
 }
 
 export default function useLayers({
+  activeStations,
   variable,
   year,
   spatialLevel,
@@ -267,6 +272,29 @@ export default function useLayers({
     })
   }, [pointData, radiusScale, variable, year, opacity])
 
+  const polygonLayerGjson = useMemo(() => {
+    if (!polygonData) return null
+
+    // console.log(polygonData)
+
+    return new GeoJsonLayer({
+      id: `geojson-layer-${variable}-${year}`,
+      data: polygonData,
+      filled: true,
+      stroked: true,
+      getFillColor: (f) => {
+        const [r, g, b, a] = [255, 255, 255, 0]//f.properties.color
+        return [r, g, b, Math.floor(a * opacity)]
+      },
+      getLineColor: () => [0, 0, 0, Math.floor(150 * boundOpacity)],
+      lineWidthMinPixels: 1,
+      pickable: true,
+      highlightColor: [255, 255, 255, 128],
+      autoHighlight: true, 
+      onClick: (info) => { console.log(info.object.properties.value, info.object.properties.UNITID); handleClick(info.object.properties.UNITID)}
+    })
+  }, [polygonData, variable, year, opacity, boundOpacity])
+  
   const polygonLayer = useMemo(() => {
     if (!polygonData) return null
 
@@ -310,17 +338,41 @@ export default function useLayers({
 
     return new IconLayer({
       id: 'station-layer',
-      data: stations.features,
+      // data: stations.features,
+      // data: stations.features.filter(feature => feature.properties["Type"] === "electric"),
+      data: stations.features.filter(feature => activeStations.includes(feature.properties["Type"])),
   
-      iconAtlas: '/EV_Station.png',
-      iconMapping: {
-        marker: { x: 0, y: 0, width: 900, height: 900, mask: false },
-      },
+      // iconAtlas: '/EV_Station.png',
+      // iconMapping: {
+      //   marker: { x: 0, y: 0, width: 900, height: 900, mask: false },
+      // },
       getPosition: (feature) => feature.geometry.coordinates,
 
-      getIcon: () => 'marker',
-      getSize: () => 4,
-      sizeScale: 15,
+      // getIcon: () => 'marker',
+      // getIcon: (feature) => {console.log(feature.properties); return {url: '/EV_Station.png', x: 0, y: 0, width: 900, height: 900, mask: false }},
+      // getIcon: (feature) => {console.log(feature.properties); return {url: '/EV_Station.png', width: 50, height: 50 }},
+      getIcon: (feature) => ({ 
+        url: feature.properties["Type"] === "electric" 
+          ? '/EV_Station.png'
+          : feature.properties["Type"] === "biodiesel"
+            ? '/biodiesel.png'
+            : feature.properties["Type"] === "ethanol"
+              ? '/ethanol.png'
+              : feature.properties["Type"] === "cng"
+                ? '/cng.png'
+                : feature.properties["Type"] === "lng"
+                  ? '/lng.png'
+                  : feature.properties["Type"] === "lpg"
+                    ? 'lpg.png'
+                    : null
+            ,
+        width: 1000,
+        height: 1000,
+      }),
+      getSize: () => 3,
+      sizeScale: 14,
+      // getSize: () => 3,
+      // sizeScale: 14,
       pickable: true,
       onClick: (info) => {
         // console.log(info.object.geometry.coordinates)
@@ -330,7 +382,7 @@ export default function useLayers({
         updateRiskData(lat, lon, name)
       },
     });
-  }, [stations, showStations]);
+  }, [stations, showStations, activeStations]);
 
   const boundaryLayer = useMemo(() => {
     if (!boundaryData) return null
@@ -374,6 +426,7 @@ export default function useLayers({
     const layers: Layer[] = []
 
     if (polygonLayer) {
+      // layers.push(polygonLayer)
       layers.push(polygonLayer)
     }
 

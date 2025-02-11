@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+const webpack = require('webpack')
 
 module.exports = {
   entry: './src/index.tsx',
@@ -9,7 +10,14 @@ module.exports = {
     path: path.resolve(__dirname, 'dist')
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      buffer: require.resolve('buffer/'),
+      zlib: require.resolve('browserify-zlib'),
+      stream: require.resolve('stream-browserify'),
+      util: require.resolve('util'),
+      fs: false, // Disable fs as it can't be used in the browser
+    },
   },
   module: {
     rules: [
@@ -22,6 +30,10 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/async',
+      },
     ]
   },
   plugins: [
@@ -29,6 +41,9 @@ module.exports = {
       template: './src/index.html',
       
     }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+  }),
     new Dotenv()
     
   ],
@@ -38,5 +53,8 @@ module.exports = {
   },
   externals: {
     'dotenv': 'commonjs dotenv' // Exclude dotenv from the bundle
-  }
+  },
+  experiments: {
+    asyncWebAssembly: true, // Enables async WebAssembly loading
+  },
 };

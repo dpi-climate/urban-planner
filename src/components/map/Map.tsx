@@ -7,6 +7,7 @@ import "mapbox-gl/dist/mapbox-gl.css"
 import useMapClick from "./useMapClick"
 import SingleDeckOverlay from "./SingleDeckOverlay"
 import useLayers from "./useLayers"
+import { StationType } from "../../types-and-interfaces/types"
 
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN as string
@@ -29,6 +30,7 @@ interface IMap {
   
   socioVariable: string
   activeSection: "climate" | "socio"
+  activeStations: StationType[]
   updateSocioLayer: (varIdx: number | null, sIdx: number | null) => void
   updateRiskData: (ptIdx: number | [number, number], elevation: number | null) => void
   setSocioInfo: React.Dispatch<
@@ -66,6 +68,13 @@ const Map: React.FC<IMap> = (props) => {
       setCurrentZoom(mapInstance.getZoom())
     })
 
+    // mapInstance.on('load', () => {
+    //   // Slower zoom when using the mouse wheel (default ~1/100)
+    //   mapInstance.scrollZoom.setWheelZoomRate(1 / 500); 
+    //   // Slower zoom when using a trackpad (default ~1)
+    //   mapInstance.scrollZoom.setZoomRate(0.2);         
+    // });
+
     setMap(mapInstance)
 
     return () => mapInstance.remove()
@@ -83,6 +92,7 @@ const Map: React.FC<IMap> = (props) => {
   // })
 
   const deckLayers = useLayers({
+    activeStations: props.activeStations,
     variable: props.variable,
     year: props.year,
     spatialLevel: props.spatialLevel,
