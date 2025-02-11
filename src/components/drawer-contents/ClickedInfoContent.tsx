@@ -149,7 +149,7 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
           alignItems: 'start',
         }}
       >
-        {renderPointInfo()}
+        {/* {renderPointInfo()} */}
         {renderLineChart()}
         {renderCircleLegend()}
       </Paper>

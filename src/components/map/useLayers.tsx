@@ -71,7 +71,11 @@ interface IStationFeature {
 }
 
 export default function useLayers({
+<<<<<<< HEAD
   activeStations,
+=======
+  bounds,
+>>>>>>> b667732 (gunicorn)
   variable,
   year,
   spatialLevel,
@@ -97,7 +101,10 @@ export default function useLayers({
     let isMounted = true
     ;(async () => {
       try {
-        const data = await DataLoader.getPointLayerData(variable, year, spatialLevel)
+        // const newBounds = spatialLevel === "pt" ? null : (bounds._sw.lng, bounds._sw.lat, bounds._ne.lng, bounds._nw.lat)
+        // (min_lng, min_lat, max_lng, max_lat)
+        // const data = await DataLoader.getPointLayerData(variable, year, spatialLevel, newBounds)
+        const data = await DataLoader.getPointLayerData(variable, year, spatialLevel, null)
 
         if (!isMounted || data === null) return
 
@@ -148,6 +155,7 @@ export default function useLayers({
 
         if(newSpatialLevel !== spatialLevel) {
           setSpatialLevel(newSpatialLevel)
+          
         }
 
       } catch (error) {
@@ -294,7 +302,11 @@ export default function useLayers({
       onClick: (info) => { console.log(info.object.properties.value, info.object.properties.UNITID); handleClick(info.object.properties.UNITID)}
     })
   }, [polygonData, variable, year, opacity, boundOpacity])
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> b667732 (gunicorn)
   const polygonLayer = useMemo(() => {
     if (!polygonData) return null
 
@@ -429,6 +441,10 @@ export default function useLayers({
       // layers.push(polygonLayer)
       layers.push(polygonLayer)
     }
+
+    // if (polygonLayerGjson) {
+    //   layers.push(polygonLayerGjson)
+    // }
 
     else if (pointLayer) {
       layers.push(pointLayer)

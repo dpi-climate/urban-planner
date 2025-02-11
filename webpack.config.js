@@ -47,7 +47,7 @@ module.exports = {
     new Dotenv()
     
   ],
-  mode: 'development',
+  mode: 'production',  // or 'development' as needed
   devServer: {
     port: 3000 // Change the port here
   },

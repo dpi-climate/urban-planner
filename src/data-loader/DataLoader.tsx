@@ -74,11 +74,11 @@ export abstract class DataLoader {
     return response
   }
 
-  static async getPointLayerData(varId: string, year: string, sLevel: string) {
+  static async getPointLayerData(varId: string, year: string, sLevel: string, bbox: any | null) {
       const url = `${serverUrl}/climate_layer`
     
       const response = await axios.get(url, {
-        params: { var_name: varId, year: year, s_agg: sLevel },
+        params: { var_name: varId, year: year, s_agg: sLevel, bbox: bbox },
         responseType: 'arraybuffer',
       })
     
@@ -137,6 +137,7 @@ export abstract class DataLoader {
         }
       // } else if(sLevel === "ct" || sLevel === "bg") {
       } else {
+<<<<<<< HEAD
         // console.log("data is here")
         // const uint8Array = new Uint8Array(response.data)
         // const table = tableFromIPC(uint8Array)
@@ -150,6 +151,15 @@ export abstract class DataLoader {
         // // return featureCollection
 
         // // const filtered = data.filter(d => d.UNITID == "170311408005")
+=======
+        // const uint8Array = new Uint8Array(response.data)
+        // const table = tableFromIPC(uint8Array)
+        // const featureCollection = arrowTableToGeoJSON(table, 'geometry')
+        // return featureCollection
+
+        const buffer = response.data;
+        return parsePolygonBinary(buffer);
+>>>>>>> b667732 (gunicorn)
         
         // // const finalData = createGeoJsonFeatureCollection(data)
         // // return finalData
@@ -251,6 +261,52 @@ export abstract class DataLoader {
             };
           }),
         };
+      }
+
+      function arrowTableToGeoJSON(table: Table, geometryColumn = 'geometry') {
+        // 1) Get the geometry vector (column)
+        const geometryVector = table.getChild(geometryColumn);
+        if (!geometryVector) {
+          throw new Error(`Column "${geometryColumn}" not found`);
+        }
+      
+        // 2) Get other column vectors & their names
+        const otherFields = table.schema.fields.filter(
+          (f) => f.name !== geometryColumn
+        );
+        const otherVectors = otherFields.map((f) => table.getChild(f.name));
+      
+        // 3) Prepare an array for Features
+        const features = [];
+        const numRows = table.numRows;
+      
+        // 4) Loop over each row index
+        for (let i = 0; i < numRows; i++) {
+          // A) WKT geometry string from geometry vector
+          const wkt = geometryVector.get(i) as string | null;
+          const geometry = wkt ? parseWkt(wkt) : null;
+      
+          // B) Gather other columns as properties
+          const properties: Record<string, unknown> = {};
+          for (let j = 0; j < otherFields.length; j++) {
+            const fieldName = otherFields[j].name;
+            const val = otherVectors[j]?.get(i);
+            properties[fieldName] = val;
+          }
+      
+          // C) Build a GeoJSON Feature
+          features.push({
+            type: 'Feature',
+            geometry: geometry as GeoJSON.Geometry | null,
+            properties,
+          });
+        }
+      
+        // 5) Return FeatureCollection
+        return {
+          type: 'FeatureCollection',
+          features,
+        } as GeoJSON.FeatureCollection;
       }
 
       function parsePolygonBinary(buffer: ArrayBuffer) {

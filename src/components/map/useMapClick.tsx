@@ -58,7 +58,7 @@ const useMapClick = (props: UseMapClickProps) => {
           return
         }
       }
-      console.log(props.variable, props.spatialLevel, props.variable === "prcp" && props.spatialLevel === "pt")
+      // console.log(props.variable, props.spatialLevel, props.variable === "prcp" && props.spatialLevel === "pt")
       if(props.variable === "prcp" && props.spatialLevel === "pt") {
         let elevation: number | null | undefined = null
         

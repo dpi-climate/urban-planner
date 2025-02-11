@@ -43,6 +43,7 @@ const Map: React.FC<IMap> = (props) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const [map, setMap] = useState<mapboxgl.Map | null>(null)
   const [currentZoom, setCurrentZoom] = useState<number>(props.zoom)
+  const [currentBounds, setCurrentBounds] = useState({})
 
   const startMap = useCallback(() => {
     if (!mapContainerRef.current) return
@@ -66,6 +67,9 @@ const Map: React.FC<IMap> = (props) => {
 
     mapInstance.on("zoom", () => {
       setCurrentZoom(mapInstance.getZoom())
+      // const bounds = mapInstance.getBounds()
+      // setCurrentBounds(bounds)
+      // HL {_sw: WL {lng: number, lat: number}, _ne: WL {lng: number, lat: number} }
     })
 
     // mapInstance.on('load', () => {
@@ -92,7 +96,11 @@ const Map: React.FC<IMap> = (props) => {
   // })
 
   const deckLayers = useLayers({
+<<<<<<< HEAD
     activeStations: props.activeStations,
+=======
+    bounds: currentBounds,
+>>>>>>> b667732 (gunicorn)
     variable: props.variable,
     year: props.year,
     spatialLevel: props.spatialLevel,
