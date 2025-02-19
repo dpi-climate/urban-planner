@@ -2,7 +2,7 @@ import "./useMapClick.css"
 import { useCallback, useEffect, useState } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
-import {createEvStationIcon, createLocationIcon} from "../../utils/Icons"
+import {createLocationIcon} from "../../utils/Icons"
 import * as turf from "@turf/turf"
 import { DataLoader } from "../../data-loader/DataLoader"
 

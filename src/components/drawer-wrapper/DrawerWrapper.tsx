@@ -7,13 +7,11 @@ import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
 
 // Import icons
-import InfoIcon from '@mui/icons-material/Info'
-import HomeIcon from '@mui/icons-material/Home'
+// import InfoIcon from '@mui/icons-material/Info'
+// import HomeIcon from '@mui/icons-material/Home'
 import CloseIcon from '@mui/icons-material/Close'
-import SettingsIcon from '@mui/icons-material/Settings'
+// import SettingsIcon from '@mui/icons-material/Settings'
 import LayersIcon from '@mui/icons-material/Layers'
-import EvStationIcon from '@mui/icons-material/EvStation'
-import CloudIcon from '@mui/icons-material/Cloud'
 import WbSunnyIcon from '@mui/icons-material/WbSunny'
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
@@ -39,18 +37,18 @@ const Buttons: React.FC<{
           case "Structure":
             icon = <LocationCityIcon/>
             break
-          case 'Home':
-            icon = <HomeIcon />
-            break
+          // case 'Home':
+          //   icon = <HomeIcon />
+          //   break
           case 'People':
             icon = <PeopleAltIcon />
             break
-          case 'Settings':
-            icon = <SettingsIcon />
-            break
-          case 'Info':
-            icon = <InfoIcon />
-            break
+          // case 'Settings':
+          //   icon = <SettingsIcon />
+          //   break
+          // case 'Info':
+          //   icon = <InfoIcon />
+          //   break
           default:
             // icon = <HomeIcon />
             icon = <LayersIcon/>
@@ -118,7 +116,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       case 'right':
         return {
           ...commonStyles,
-          top: 0,
+          top: 65,
           right: 0,
           transform: isOpen ? `translateX(-${size.right}px)` : 'translateX(0)',
           flexDirection: 'column',
@@ -127,7 +125,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       case 'left':
         return {
           ...commonStyles,
-          top: 0,
+          top: 65,
           left: 0,
           transform: isOpen ? `translateX(${size.left}px)` : 'translateX(0)',
           flexDirection: 'column',

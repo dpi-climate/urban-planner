@@ -4,14 +4,14 @@ import Typography from '@mui/material/Typography'
 import Paper from '@mui/material/Paper'
 
 // Icons
-import InfoIcon from '@mui/icons-material/Info'
+// import InfoIcon from '@mui/icons-material/Info'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 
 // Interfaces
 import { InfoContentProps } from '../../types-and-interfaces/interfaces'
 
 // Charts
-import BarChart from '../bar-chart/BarChartZoom'
+// import BarChart from '../bar-chart/BarChartZoom'
 import LineChart from '../line-chart/LineChart'
 
 // Risk Legend

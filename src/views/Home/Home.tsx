@@ -1,5 +1,5 @@
 import "./Home.css"
-import React, { useCallback, useEffect, useState, useRef } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 
 import Map from "../../components/map/Map"
 import ElementWrapper from "../../components/element-wrapper/ElementWrapper"
@@ -19,7 +19,6 @@ import MySlider from "../../components/map/MySlider"
 import { StationType } from "../../types-and-interfaces/types"
 
 const Home = () => {
- 
   // /////////////////////////////////////////////////////////////////////////////////
   // ////////////////   CLIMATE CONTENT   ////////////////////////////////////////////
   
@@ -51,7 +50,8 @@ const Home = () => {
   
   // Stations
   const [showStations, setShowStations] = useState<boolean>(true)
-  const [activeStations, setStations] = useState<StationType[]>(["electric", "biodiesel", "ethanol", "cng", "lng", "lpg"])
+  // const [activeStations, setStations] = useState<StationType[]>(["electric", "biodiesel", "ethanol", "cng", "lng", "lpg"])
+  const [activeStations, setStations] = useState<StationType[]>([])
 
 
   // const drawerBtns = ["Layers", "Home"]
@@ -254,9 +254,9 @@ const Home = () => {
   const renderMap = () => {
     return (
       
-      <ElementWrapper height='95vh'>
+      <ElementWrapper height='100%'>
         <Map 
-          style="mapbox://styles/carolvfs/clxnzay8z02qh01qkhftqheen" 
+          style="mapbox://styles/mapbox/standard-satellite" 
           center={[-89.12987909766366, 40.09236099826568] as [number, number]}
           zoom={6}
           variable={climateVarsItems.length > 0 ? climateVarsItems[variableIdx].id : null}
@@ -282,13 +282,10 @@ const Home = () => {
 
   const renderMapElementWrapper = () => {
     return (
-      // <ElementWrapper width='1850px' height='800px' right='-100px'>
-      // <ElementWrapper height='95vh'>
-      // <ElementWrapper width='1850px' height='800px' right='0px'>
-      <ElementWrapper height='95vh'>
-        {renderMap()}
+      <>
+      {renderMap()}
         {renderColorMapWrapper()}
-      </ElementWrapper>
+      </>
 
     )
   }
@@ -312,35 +309,31 @@ const Home = () => {
     )
   }
 
-  const renderHeader = () => {
-    return (
-      <ElementWrapper width='1850px' height='100px' right='0px'>
-
-      </ElementWrapper>
-      // <div className="logo-container">
-      //   <img className="climate-logo" src="/new-climate-logo-background.png" alt="climate-logo"/>
-      //   <img className="cleets-logo" src="/cleets-logo.png" alt="cleets-logo" />
-      // </div>
-    )
-  }
-
   const renderLogos = () => {
     return (
       <div className="logo-container">
         <img className="climate-logo" src="/new-climate-logo-background.png" alt="climate-logo"/>
-        <img className="cleets-logo" src="/cleets-logo.png" alt="cleets-logo" />
+        <img className="cleets-logo" src="/cleets logo-01.png" alt="cleets-logo" />
       </div>
     )
   }
 
   const render = () => {
     return (
-      <div className="home">
-        { renderMenu() }
-        { renderMapElementWrapper() }
-        {renderInfoDrawer()}
-        {renderLogos()}
+      <>
+      <div className="my-header">
+      <div className="header-text">Flood Risks on Charging Infrastructure for the State of Illinois</div>
+       {renderLogos()}
       </div>
+      <div className="content">
+        <div className="home">
+          { renderMenu() }
+          { renderMapElementWrapper() }
+          {renderInfoDrawer()}
+        </div>
+        
+      </div>
+      </>
     )
   }
 

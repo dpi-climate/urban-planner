@@ -1,23 +1,41 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
-const webpack = require('webpack')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
   entry: './src/index.tsx',
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    filename: '[name].[contenthash].js',
+    path: path.resolve(__dirname, 'dist'),
+    clean: true,
+  },
+  performance: {
+    hints: 'warning', // or 'error' or false to disable
+    maxAssetSize: 300000000,
+    maxEntrypointSize: 300000000,
+  },
+  mode: isProduction ? 'production' : 'development',
+  devtool: isProduction ? 'source-map' : 'cheap-module-source-map',
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
+    runtimeChunk: 'single',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
-    fallback: {
-      buffer: require.resolve('buffer/'),
-      zlib: require.resolve('browserify-zlib'),
-      stream: require.resolve('stream-browserify'),
-      util: require.resolve('util'),
-      fs: false, // Disable fs as it can't be used in the browser
-    },
   },
   module: {
     rules: [
@@ -38,23 +56,24 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/index.html',
-      
+      template: './src/index.html'
     }),
-    new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-  }),
-    new Dotenv()
-    
+    new Dotenv(), // might remove or limit if not needed in production
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'public', to: '' },
+      ],
+    }),
+    // new BundleAnalyzerPlugin(),
   ],
-  mode: 'production',  // or 'development' as needed
   devServer: {
-    port: 3000 // Change the port here
+    port: 3000,
   },
   externals: {
-    'dotenv': 'commonjs dotenv' // Exclude dotenv from the bundle
+    dotenv: 'commonjs dotenv'
   },
   experiments: {
-    asyncWebAssembly: true, // Enables async WebAssembly loading
+    asyncWebAssembly: true,
   },
 };

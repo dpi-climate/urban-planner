@@ -21,6 +21,7 @@ function MySlider(props: MySliderProps) {
   return (
     <Box
       sx={{
+        userSelect: "none",
         width: 100,
         position: 'relative', // Ensure the Box is a positioned container
         overflow: 'visible',

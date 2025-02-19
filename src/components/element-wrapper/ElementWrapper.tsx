@@ -11,9 +11,8 @@ const ElementWrapper = (props: any) => {
       flexDirection: 'column',
       width: props.width,
       height: props.height,
-      // backgroundColor: 'purple',
-      margin: '10px',
-      padding: '5px'
+      margin: '2px',
+      padding: '0px'
     }}>
       {props.children}
     </div>

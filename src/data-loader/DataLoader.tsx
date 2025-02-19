@@ -1,7 +1,7 @@
 import axios from "axios"
 import { serverUrl } from "../consts/consts"
-import { tableFromIPC, Table } from 'apache-arrow'
-import parseWkt from 'wellknown';
+// import { tableFromIPC, Table } from 'apache-arrow'
+// import parseWkt from 'wellknown';
 
 export abstract class DataLoader {
 
@@ -137,21 +137,6 @@ export abstract class DataLoader {
         }
       // } else if(sLevel === "ct" || sLevel === "bg") {
       } else {
-<<<<<<< HEAD
-        // console.log("data is here")
-        // const uint8Array = new Uint8Array(response.data)
-        // const table = tableFromIPC(uint8Array)
-        // console.log("table is here")
-        // // console.log(table)
-        // const featureCollection = arrowTableToGeoJSON(table, 'geometry')
-        // console.log("featureCollection is here")
-        // // console.log(featureCollection)
-
-        // return featureCollection
-        // // return featureCollection
-
-        // // const filtered = data.filter(d => d.UNITID == "170311408005")
-=======
         // const uint8Array = new Uint8Array(response.data)
         // const table = tableFromIPC(uint8Array)
         // const featureCollection = arrowTableToGeoJSON(table, 'geometry')
@@ -159,109 +144,15 @@ export abstract class DataLoader {
 
         const buffer = response.data;
         return parsePolygonBinary(buffer);
->>>>>>> b667732 (gunicorn)
         
         // // const finalData = createGeoJsonFeatureCollection(data)
         // // return finalData
-        const buffer = response.data
-        return parsePolygonBinary(buffer);
+        // const buffer = response.data
+        // return parsePolygonBinary(buffer);
 
         
       }
 
-      function arrowTableToGeoJSON(table: Table, geometryColumn = 'geometry') {
-        // 1) Get the geometry vector (column)
-        const geometryVector = table.getChild(geometryColumn);
-        if (!geometryVector) {
-          throw new Error(`Column "${geometryColumn}" not found`);
-        }
-      
-        // 2) Get other column vectors & their names
-        const otherFields = table.schema.fields.filter(
-          (f) => f.name !== geometryColumn
-        );
-        const otherVectors = otherFields.map((f) => table.getChild(f.name));
-      
-        // 3) Prepare an array for Features
-        const features = [];
-        const numRows = table.numRows;
-      
-        // 4) Loop over each row index
-        for (let i = 0; i < numRows; i++) {
-          // A) WKT geometry string from geometry vector
-          const wkt = geometryVector.get(i) as string | null;
-          const geometry = wkt ? parseWkt(wkt) : null;
-      
-          // B) Gather other columns as properties
-          const properties: Record<string, unknown> = {};
-          for (let j = 0; j < otherFields.length; j++) {
-            const fieldName = otherFields[j].name;
-            const val = otherVectors[j]?.get(i);
-            properties[fieldName] = val;
-          }
-      
-          // C) Build a GeoJSON Feature
-          features.push({
-            type: 'Feature',
-            geometry: geometry as GeoJSON.Geometry | null,
-            properties,
-          });
-        }
-      
-        // 5) Return FeatureCollection
-        return {
-          type: 'FeatureCollection',
-          features,
-        } as GeoJSON.FeatureCollection;
-      }
-
-      function arrowTableToGeoJSON_old(table: Table, geometryColumn = 'geometry') {
-        // Convert the entire table into an array of row objects
-        const rows = table.toArray();
-        
-        // Build up a GeoJSON FeatureCollection
-        const features = rows.map((row) => {
-          // row is an object with { geometry, otherColumn1, otherColumn2, ... }
-          const wkt = row[geometryColumn] as string | null;
-      
-          // Convert WKT -> GeoJSON geometry
-          const geometry = wkt ? parseWkt(wkt) : null;
-      
-          // Use the rest of the columns as Feature properties
-          // (Remove the geometry field from properties)
-          const { [geometryColumn]: _unused, ...properties } = row;
-          
-          return {
-            type: 'Feature',
-            geometry: geometry as GeoJSON.Geometry | null,
-            properties,
-          } as GeoJSON.Feature;
-        });
-      
-        return {
-          type: 'FeatureCollection',
-          features,
-        } as GeoJSON.FeatureCollection;
-      }
-
-      function createGeoJsonFeatureCollection(data: any[]) {
-        return {
-          type: "FeatureCollection",
-          features: data.map((row) => {
-
-            return {
-              type: "Feature",
-              // geometry: wellknown.parse(row.geometry), // converts WKT -> GeoJSON geometry
-              geometry: row.geometry ? wellknown.parse(row.geometry) : null, // converts WKT -> GeoJSON geometry
-              properties: {
-                // put whatever attributes you want here
-                ...row,
-                geometry: undefined
-              }
-            };
-          }),
-        };
-      }
 
       function arrowTableToGeoJSON(table: Table, geometryColumn = 'geometry') {
         // 1) Get the geometry vector (column)

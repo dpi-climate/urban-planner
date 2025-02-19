@@ -1,29 +1,36 @@
-.home {
-    /* background-color: #EAEAEA; */
+/* .home {
+    
     height:100%;
     width:100%;
-}
+} */
 
 .logo-container {
-  position: fixed; /* keeps container in one place while scrolling */
+  /* position: fixed; 
   top: 0;
   left: 0;
-  z-index: 9999; /* ensures the container is on top of other elements */
+  z-index: 9999;  */
 
-  display: flex; /* places images in a row */
-  align-items: center; /* vertically center the images if they vary in height */
-  gap: 1rem; /* optional space between images */
-  margin: 1rem; /* optional margin to keep them off the screen edges */
+  display: flex; 
+  align-items: center; 
+  /* justify-content: center; */
+  gap: 10px; 
 }
 
-.climate-logo {
-  width: 150px;  /* or any other desired size */
-  height: auto; /* maintains aspect ratio */
+.climate-logo, .cleets-logo {
+  max-height: 45px;
+  /* height: 45px; */
+  /* max-width: 100px; */
+  object-fit: contain;
+}
+
+/* .climate-logo {
+  width: 150px;  
+  height: auto; 
 
 }
 
 .cleets-logo {
-  width: 60px;  /* or any other desired size */
-  height: auto; /* maintains aspect ratio */
+  width: 60px;  
+  height: auto; 
 
-}
+} */

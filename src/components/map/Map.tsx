@@ -4,7 +4,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 
-import useMapClick from "./useMapClick"
+// import useMapClick from "./useMapClick"
 import SingleDeckOverlay from "./SingleDeckOverlay"
 import useLayers from "./useLayers"
 import { StationType } from "../../types-and-interfaces/types"
@@ -96,11 +96,7 @@ const Map: React.FC<IMap> = (props) => {
   // })
 
   const deckLayers = useLayers({
-<<<<<<< HEAD
     activeStations: props.activeStations,
-=======
-    bounds: currentBounds,
->>>>>>> b667732 (gunicorn)
     variable: props.variable,
     year: props.year,
     spatialLevel: props.spatialLevel,

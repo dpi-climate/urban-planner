@@ -1,5 +1,4 @@
-// ClimateContent.jsx
-import React, { useState } from 'react'
+import React from 'react'
 
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -15,28 +14,28 @@ const subtitle = ""
 
 const ClimateContent: React.FC<DrawerWrapperContentProps> = (props) => {
 
-  const renderBoundariesDropdown = () => {
-    if(props.boundariesList.length > 0) {
-      return (
-        <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
-          <InputLabel>Boundaries</InputLabel>
-          <Select
-            value={`${props.boundaryIdx}`}
-            label={props.boundariesList[props.boundaryIdx].name}
-            onChange={(event: SelectChangeEvent) => {
-              const newIdx = parseInt(event.target.value)
-              props.setBoundaryIdx(newIdx)
-            }}
-              disabled={props.spatialAggList[props.spatialAggIdx].id !== "pt"}
-          >
-            {
-              props.boundariesList.map((obj: {name: string, id: string}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
-            }
-          </Select>
-        </FormControl>
-      )
-    }
-  }
+  // const renderBoundariesDropdown = () => {
+  //   if(props.boundariesList.length > 0) {
+  //     return (
+  //       <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
+  //         <InputLabel>Boundaries</InputLabel>
+  //         <Select
+  //           value={`${props.boundaryIdx}`}
+  //           label={props.boundariesList[props.boundaryIdx].name}
+  //           onChange={(event: SelectChangeEvent) => {
+  //             const newIdx = parseInt(event.target.value)
+  //             props.setBoundaryIdx(newIdx)
+  //           }}
+  //             disabled={props.spatialAggList[props.spatialAggIdx].id !== "pt"}
+  //         >
+  //           {
+  //             props.boundariesList.map((obj: {name: string, id: string}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
+  //           }
+  //         </Select>
+  //       </FormControl>
+  //     )
+  //   }
+  // }
   
   const renderVariableDropdown = () => {
     if(props.variables.length > 0 && props.yearIdx !== null) {

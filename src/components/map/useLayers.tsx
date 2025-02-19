@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { ScatterplotLayer, GeoJsonLayer, IconLayer } from "@deck.gl/layers"
 import { Layer } from "@deck.gl/core"
 import { DataLoader } from "../../data-loader/DataLoader"
-import wellknown from "wellknown";
+// import wellknown from "wellknown";
 import { StationType } from "../../types-and-interfaces/types";
 
 interface IUseLayersParams {
@@ -71,11 +71,7 @@ interface IStationFeature {
 }
 
 export default function useLayers({
-<<<<<<< HEAD
   activeStations,
-=======
-  bounds,
->>>>>>> b667732 (gunicorn)
   variable,
   year,
   spatialLevel,
@@ -302,11 +298,7 @@ export default function useLayers({
       onClick: (info) => { console.log(info.object.properties.value, info.object.properties.UNITID); handleClick(info.object.properties.UNITID)}
     })
   }, [polygonData, variable, year, opacity, boundOpacity])
-<<<<<<< HEAD
   
-=======
-
->>>>>>> b667732 (gunicorn)
   const polygonLayer = useMemo(() => {
     if (!polygonData) return null
 
