@@ -8,6 +8,7 @@ interface MySliderProps {
   max: number
   step: number
   initialValue: number
+  title: string
   onChange: (value: number) => void
 }
 
@@ -20,6 +21,7 @@ function MySlider(props: MySliderProps) {
   return (
     <Box
       sx={{
+        userSelect: "none",
         width: 100,
         position: 'relative', // Ensure the Box is a positioned container
         overflow: 'visible',
@@ -27,17 +29,19 @@ function MySlider(props: MySliderProps) {
         marginRight: '10px',
       }}
       onPointerEnter={() => props.setControlDrag(false)}
-      onPointerLeave={() => props.setControlDrag(true)}
-    > Opacity
+      onPointerLeave={() => {props.setControlDrag(true)}}
+    > {props.title}
       <Slider
         min={props.min}
         max={props.max}
+        // value={props.value}
         defaultValue={props.initialValue}
         step={props.step}
         size="small"
-        onChange={handleChange}
+        onChangeCommitted={handleChange}
         aria-label="Small"
         valueLabelDisplay="auto"
+
       />
     </Box>
   )

@@ -5,13 +5,14 @@ const ElementWrapper = (props: any) => {
     <div style={{
       position: 'relative',
       right: props.right,
+      top: props.top,
+      bottom: props.bottom,
       display: 'flex',
       flexDirection: 'column',
       width: props.width,
       height: props.height,
-      // backgroundColor: 'purple',
-      margin: '10px',
-      padding: '5px'
+      margin: '2px',
+      padding: '0px'
     }}>
       {props.children}
     </div>

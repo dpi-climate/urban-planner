@@ -1,5 +1,36 @@
-.home {
-    /* background-color: #EAEAEA; */
+/* .home {
+    
     height:100%;
     width:100%;
+} */
+
+.logo-container {
+  /* position: fixed; 
+  top: 0;
+  left: 0;
+  z-index: 9999;  */
+
+  display: flex; 
+  align-items: center; 
+  /* justify-content: center; */
+  gap: 10px; 
 }
+
+.climate-logo, .cleets-logo {
+  max-height: 45px;
+  /* height: 45px; */
+  /* max-width: 100px; */
+  object-fit: contain;
+}
+
+/* .climate-logo {
+  width: 150px;  
+  height: auto; 
+
+}
+
+.cleets-logo {
+  width: 60px;  
+  height: auto; 
+
+} */

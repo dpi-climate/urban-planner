@@ -1,4 +1,6 @@
 .color-bar-wrapper {
+    bottom: 40px;
+    left: 10px;
     z-index: 1001;
     padding: 0px;
     position: absolute;

@@ -7,12 +7,14 @@ import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
 
 // Import icons
-import InfoIcon from '@mui/icons-material/Info'
-import HomeIcon from '@mui/icons-material/Home'
+// import InfoIcon from '@mui/icons-material/Info'
+// import HomeIcon from '@mui/icons-material/Home'
 import CloseIcon from '@mui/icons-material/Close'
-import SettingsIcon from '@mui/icons-material/Settings'
+// import SettingsIcon from '@mui/icons-material/Settings'
 import LayersIcon from '@mui/icons-material/Layers'
-import EvStationIcon from '@mui/icons-material/EvStation'
+import WbSunnyIcon from '@mui/icons-material/WbSunny'
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
 
 // Import types
 import { DrawerWrapperProps } from '../../types-and-interfaces/interfaces'
@@ -29,23 +31,27 @@ const Buttons: React.FC<{
         let icon
 
         switch (label) {
-          case "Layers":
-            icon = <LayersIcon/>
+          case "Climate":
+            icon = <WbSunnyIcon/>
             break
-          case "EV-Stations":
-            icon = <EvStationIcon/>
+          case "Structure":
+            icon = <LocationCityIcon/>
             break
-          case 'Home':
-            icon = <HomeIcon />
+          // case 'Home':
+          //   icon = <HomeIcon />
+          //   break
+          case 'People':
+            icon = <PeopleAltIcon />
             break
-          case 'Settings':
-            icon = <SettingsIcon />
-            break
-          case 'Info':
-            icon = <InfoIcon />
-            break
+          // case 'Settings':
+          //   icon = <SettingsIcon />
+          //   break
+          // case 'Info':
+          //   icon = <InfoIcon />
+          //   break
           default:
-            icon = <HomeIcon />
+            // icon = <HomeIcon />
+            icon = <LayersIcon/>
         }
 
         return (
@@ -110,7 +116,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       case 'right':
         return {
           ...commonStyles,
-          top: 0,
+          top: 65,
           right: 0,
           transform: isOpen ? `translateX(-${size.right}px)` : 'translateX(0)',
           flexDirection: 'column',
@@ -119,7 +125,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       case 'left':
         return {
           ...commonStyles,
-          top: 0,
+          top: 65,
           left: 0,
           transform: isOpen ? `translateX(${size.left}px)` : 'translateX(0)',
           flexDirection: 'column',
@@ -162,15 +168,31 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
     }
   }
 
+  // useEffect(() => {
+  //   if (props.clickedLocal) {
+  //     setIsOpen(true)
+  //     if (props.setBtn) props.setBtn(props.clickedLocal)
+  //   } else {
+  //     setIsOpen(false)
+  //     if (props.setClickedLocal) {
+  //       // props.setClickedLocal(null)
+  //       props.setClickedLocal(
+  //   props.clickedLocal ? JSON.stringify(props.clickedLocal) : null
+  // );
+  //     }
+  //   }
+  // }, [props.clickedLocal, props.setClickedLocal, props.setBtn])
+
   useEffect(() => {
     if (props.clickedLocal) {
-      setIsOpen(true)
-      if (props.setBtn) props.setBtn(props.clickedLocal)
+      setIsOpen(true);
+      if (props.setBtn) props.setBtn(props.clickedLocal);
     } else {
-      setIsOpen(false)
-      if (props.setClickedLocal) props.setClickedLocal(null)
+      setIsOpen(false);
+      if (props.setClickedLocal) props.setClickedLocal(null);
     }
-  }, [props.clickedLocal, props.setClickedLocal, props.setBtn])
+  }, [props.clickedLocal, props.setClickedLocal, props.setBtn]);
+  
 
   return (
     <div style={{ position: 'relative' }}>
@@ -216,8 +238,8 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
             overflowY: 'auto',
             overflowX: 'hidden',
             padding: 0.5,
-            marginTop: props.anchor === 'top' ? '48px' : 0, // Adjust margin if needed
-            marginBottom: props.anchor === 'bottom' ? '48px' : 0, // Adjust margin if needed
+            marginTop: props.anchor === 'top' ? '48px' : 0,
+            marginBottom: props.anchor === 'bottom' ? '48px' : 0,
           }}
         >
           {props.children}

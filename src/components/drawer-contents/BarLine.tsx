@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import BarChart from "../bar-chart/BarChart"
-import LineChart from "../line-chart/LineChart"
+// import LineChart from "../line-chart/LineChart"
 
 const App: React.FC = () => {
   const [data1, setData1] = useState([
@@ -38,7 +38,7 @@ const App: React.FC = () => {
     </div>
     <div>
       <h1>Dynamic Bar Chart</h1>
-      <LineChart data={data2} width={600} height={400} />
+      {/* <LineChart data={data2} width={600} height={400} /> */}
     </div>
     </>
   )

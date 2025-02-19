@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import { DataLoader } from "../../data-loader/DataLoader";
-import mapboxgl from "mapbox-gl";
+// import mapboxgl from "mapbox-gl";
 
 interface IGeoFeatureProperties {
   GEOID: string;

@@ -8,7 +8,7 @@ const ColorBarWrapper = (props: any) => {
     const legRef = useRef<HTMLDivElement>(null)
 
   return (
-    <Draggable nodeRef={legRef} disabled={false}>
+    <Draggable nodeRef={legRef} disabled={!props.controlDrag}>
       <div ref={legRef} className='color-bar-wrapper' id="color-bar-wrapper" 
         style={{ display: props.display}}>
         <div style={{overflowY: "auto", overflowX: "clip", height: "73%", padding: "10px"}}>
