@@ -316,7 +316,7 @@ const ColorBar: React.FC<IColorBar> = (props) => {
         .attr('x', x0_unit)
         .attr('y', y0_unit)
         .attr('text-anchor', 'start')
-        .attr('font-size', 12)
+        .attr('font-size', 14)
         .text(`${props.label}`)
     }
 

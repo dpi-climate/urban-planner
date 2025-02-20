@@ -6,8 +6,8 @@ export interface DrawerWrapperProps {
   buttons?: string[]
   setBtn?: React.Dispatch<SetStateAction<string | null>>;//Dispatch<SetStateAction<string | null>>
   children?: React.ReactNode
-  clickedLocal?: string | null
-  setClickedLocal?: React.Dispatch<SetStateAction<string | null>>
+  riskData?: RiskDataType
+  setRiskData?: React.Dispatch<SetStateAction<RiskDataType>>
 }
 
 export interface DrawerWrapperContentProps {

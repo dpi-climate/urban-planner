@@ -1,7 +1,9 @@
 import axios from "axios"
-import { serverUrl } from "../consts/consts"
+// import { serverUrl } from "../consts/consts"
 // import { tableFromIPC, Table } from 'apache-arrow'
 // import parseWkt from 'wellknown';
+
+const serverUrl = process.env.REACT_APP_SERVER_URL as string
 
 export abstract class DataLoader {
 

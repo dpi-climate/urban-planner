@@ -25,7 +25,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableRow from '@mui/material/TableRow'
 
 const title = ""//"Local Info"
-const subtitle = "o"
+const subtitle = "Flood risks for different recurrence intervals"
 
 const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
 
@@ -135,7 +135,7 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
     <Box sx={{ padding: 0.5 }}>
       <Typography variant="h6">{title}</Typography>
       {subtitle && (
-        <Typography variant="subtitle1">{subtitle}</Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{subtitle}</Typography>
       )}
       <Paper
         elevation={0}
@@ -153,34 +153,11 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
         {renderCircleLegend()}
       </Paper>
 
-      {/* <Paper
-        elevation={0}
-        sx={{
-          padding: 1, // Reduce padding to minimize vertical space
-          marginTop: 0.5, // Space above the first Paper
-          borderRadius: 2,
-          display: 'flex',
-          flexDirection: 'column', // Ensure content stacks vertically if needed
-          alignItems: 'start',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {renderPointInfo()}
-        </Box>
-        {props.riskData.length > 0 && (
-          <Box sx={{ marginTop: 1 }}>{renderLineChart()}</Box>
-        )}
-        {props.riskData.length > 0 && (
-          <Box sx={{ marginTop: 1 }}>{renderCircleLegend()}</Box>
-        )}
-      </Paper> */}
-
-
       <Paper
         elevation={0}
         sx={{
           padding: 1,
-          // marginTop: 0.2, // Reduced space between the Papers
+          // marginTop: 0.2,
           borderRadius: 2,
           display: 'flex',
           flexDirection: 'column',

@@ -49,18 +49,27 @@ function MySlider({
       onPointerEnter={() => setControlDrag(false)}
       onPointerLeave={() => setControlDrag(true)}
     >
-      {title}
+      <Box
+        sx={{
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          // textOverflow: 'ellipsis',
+          display: 'block',
+        }}
+      >
+        {title}
+      </Box>
       <Slider
         min={min}
         max={max}
         step={step}
-        value={value}                        // <-- Controlled: use `value` rather than `defaultValue`
+        value={value}
         onChange={handleChange}
         aria-label="Small"
         valueLabelDisplay="auto"
       />
     </Box>
-  );
+  )
 }
 
 export default MySlider;

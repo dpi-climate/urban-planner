@@ -9,4 +9,8 @@
     opacity: 1.0;
     box-shadow: 0 2px 8px 0 rgba(99,99,99,.2);
     background-color: white;
+    user-select: none;
+    -webkit-user-select: none; 
+    -moz-user-select: none;
+    -ms-user-select: none;
 }

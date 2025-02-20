@@ -86,9 +86,14 @@ const MapWrapper: React.FC<MapWrapperProps> = ({
 
   const renderColorMapWrapper = () => {
     const arr = activeSection === 'climate' ? climateVarsList : socioVarsList
-    const idx = variableIdx ? variableIdx : socioVarIdx
+    const idx = variableIdx !== null
+      ? variableIdx
+      : socioVarIdx !== null
+        ? socioVarIdx
+        : null
 
-    if (!arr?.[idx]) return null
+      if(idx === null || !arr?.[idx]) return null
+
 
     return (
       <ColorBarWrapper display="block" controlDrag={controlDrag}>

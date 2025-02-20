@@ -7,7 +7,7 @@ import ClickedInfoContent from "../../components/drawer-contents/ClickedInfoCont
 
 import { DataLoader } from "../../data-loader/DataLoader"
 
-import { StationType } from "../../types-and-interfaces/types"
+import { StationType, RiskDataType } from "../../types-and-interfaces/types"
 import MapWrapper from "../../components/map/MapWrapper"
 
 import ClimateDrawer from "../../components/drawer-contents/ClimateDrawer"
@@ -33,8 +33,10 @@ const Home = () => {
   const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(0)  
 
   // Risk
-  const [riskData, setRiskData] = useState<{ year: string, value: number}[]>([])
+  const [riskData, setRiskData] = useState<RiskDataType>([])
+  const [infoDrawerIsOpen, setInfoDrawerIsOpen] = useState<boolean>(false)
   
+  // Menu
   const [activeDrawerBtn, setDrawerBtn] = useState<string | null>(null)
   const drawerBtns = ["Climate", "Structure", "People"]
   
@@ -64,32 +66,23 @@ const Home = () => {
   // ////////////////   UPDATE FUNCTIONS   ///////////////////////////////////////////
 
   const updateLayer = (varIdx: number | "" | null, yIdx: number | null, sIdx: number | null) => {
-
+    
     if(varIdx !== null) {
       if (varIdx === "") {
         setVariableIdx(null)
-        setClickedLocal(null)
-        setRiskData([])
-
-      } else if(climateVarsItems[varIdx].id !== "prcp") {
-        setClickedLocal(null)
-        setRiskData([])
-        setVariableIdx(varIdx)
-
+        
       } else {
-
         setVariableIdx(varIdx)
       }
       
-      setSocioVarIdx(null)
       setActiveSection("climate")
     }
-
+    
     if(yIdx !== null)  {
       setYearIdx(yIdx)
       setActiveSection("climate")
     }
-
+    
     if(sIdx !== null)   {
       if (climateSpLvlList[sIdx].id !== "pt") {
         setBoundaryIdx(0)
@@ -98,6 +91,10 @@ const Home = () => {
       }
       setSpatialAggIdx(sIdx)
     }
+    
+    // setClickedLocal(null)
+    setRiskData([])
+    setSocioVarIdx(null)
   }
 
   const updateSocioLayer = (varIdx: number | "" | null, sIdx: number | null) => {
@@ -111,6 +108,9 @@ const Home = () => {
         setActiveSection("socio")
       }
     }
+
+    // setClickedLocal(null)
+    setRiskData([])
 
   }
 
@@ -172,7 +172,7 @@ const Home = () => {
   
   const renderMenu = () => {
     return (
-      <DrawerWrapper anchor="right" buttons={drawerBtns} setBtn={setDrawerBtn} key="menu" keys="menu">
+      <DrawerWrapper anchor="right" buttons={drawerBtns} setBtn={setDrawerBtn} setRiskData={setRiskData}>
         {activeDrawerBtn === 'Climate' && (
           <ClimateDrawer
             variableIdx={variableIdx}
@@ -212,8 +212,8 @@ const Home = () => {
     return (
       <DrawerWrapper 
         anchor={"bottom"}
-        clickedLocal={activeStation} 
-        setClickedLocal={setStation}
+        riskData={riskData}
+        setRiskData={setRiskData}
       >
         <ClickedInfoContent 
           clickedLocal={clickedLocal}

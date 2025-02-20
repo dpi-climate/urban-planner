@@ -88,15 +88,17 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
   const size = { top: 350, bottom: 300, left: 350, right: 350 } // Drawer size
 
   const toggleDrawer = (open: boolean, label?: string) => (event: React.MouseEvent | React.KeyboardEvent) => {
-    // Only allow closing via the close button
     if (open) {
 
       setIsOpen(true)
       if (label && props.setBtn) props.setBtn(label)
+        if(props.setRiskData) props.setRiskData([])
+      
     } else {
       setIsOpen(false)
-      if (props.setClickedLocal) props.setClickedLocal(null)
-    }
+      if(props.setRiskData) props.setRiskData([])
+      }
+      console.log(props.setRiskData)
   }
 
   const handleButtonClick = (label: string, event: React.MouseEvent | React.KeyboardEvent) => {
@@ -168,17 +170,16 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       return null
     }
   }
-  // console.log(isOpen, props.keys)
 
   useEffect(() => {
-    if (props.clickedLocal) {
-      setIsOpen(true);
-      if (props.setBtn) props.setBtn(props.clickedLocal);
+    if(props.riskData && props.riskData.length > 0) {
+      setIsOpen(true)
+    
     } else {
-      setIsOpen(false);
-      if (props.setClickedLocal) props.setClickedLocal(null);
+      setIsOpen(false)
+      // if(props.setRiskData) props.setRiskData([])
     }
-  }, [props.clickedLocal, props.setClickedLocal, props.setBtn]);
+  }, [props.riskData, props.setRiskData]);
 
   return (
     <div style={{ position: 'relative' }}>
