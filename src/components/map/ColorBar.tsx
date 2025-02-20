@@ -270,13 +270,6 @@ const ColorBar: React.FC<IColorBar> = (props) => {
           .attr("stop-opacity", 1);
       }
     };
-    
-    
-    
-
-    
-    
-    
 
     const updateRect = () => {
 

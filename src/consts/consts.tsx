@@ -1,5 +1,5 @@
-// export const serverUrl = "http://localhost:5000"
-export const serverUrl = "https://urban.evl.uic.edu:443"
+export const serverUrl = "http://localhost:5000"
+// export const serverUrl = "https://urban.evl.uic.edu:443"
 
 export const CLIMATE_YEARS = Array.from({ length: 2023 - 1980 + 1 }, (_, i) => (1980 + i).toString())
 

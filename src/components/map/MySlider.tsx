@@ -1,50 +1,66 @@
-import * as React from 'react'
-import Box from '@mui/material/Box'
-import Slider from '@mui/material/Slider'
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
 
 interface MySliderProps {
-  setControlDrag: (isDragging: boolean) => void
-  min: number
-  max: number
-  step: number
-  initialValue: number
-  title: string
-  onChange: (value: number) => void
+  // Parent passes the current value here
+  value: number;                    
+  onChange: (value: number) => void;
+
+  // Min, max, step, etc.
+  min: number;
+  max: number;
+  step: number;
+
+  // For pointer interactions
+  setControlDrag: (isDragging: boolean) => void;
+
+  // For labeling the slider
+  title: string;
 }
 
-function MySlider(props: MySliderProps) {
-  const handleChange = (event: Event, value: number | number[]) => {
-    if (props.onChange && typeof value === 'number') {
-      props.onChange(value); // Call the passed onChange handler with the new value
+function MySlider({
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  setControlDrag,
+  title,
+}: MySliderProps) {
+
+  // Handler for slider moves
+  const handleChange = (_event: Event, newValue: number | number[]) => {
+    if (typeof newValue === 'number') {
+      onChange(newValue); // Pass the updated value to the parent
     }
-  }
+  };
+
   return (
     <Box
       sx={{
-        userSelect: "none",
+        userSelect: 'none',
         width: 100,
-        position: 'relative', // Ensure the Box is a positioned container
+        position: 'relative',
         overflow: 'visible',
         marginLeft: '10px',
         marginRight: '10px',
       }}
-      onPointerEnter={() => props.setControlDrag(false)}
-      onPointerLeave={() => {props.setControlDrag(true)}}
-    > {props.title}
+      onPointerEnter={() => setControlDrag(false)}
+      onPointerLeave={() => setControlDrag(true)}
+    >
+      {title}
       <Slider
-        min={props.min}
-        max={props.max}
-        // value={props.value}
-        defaultValue={props.initialValue}
-        step={props.step}
-        size="small"
-        onChangeCommitted={handleChange}
+        min={min}
+        max={max}
+        step={step}
+        value={value}                        // <-- Controlled: use `value` rather than `defaultValue`
+        onChange={handleChange}
         aria-label="Small"
         valueLabelDisplay="auto"
-
       />
     </Box>
-  )
+  );
 }
 
-export default MySlider
+export default MySlider;

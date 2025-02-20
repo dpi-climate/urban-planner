@@ -13,6 +13,7 @@ const subtitle = ""
 interface IPeopleContent {
   socioVariables: {name: string, id: string}[]
   socioVarIdx: number
+  setSocioVarIdx: React.Dispatch<React.SetStateAction<number>>
   updateSocioLayer: (varIdx: number | null, sIdx: number | null) => void
 
 }
@@ -25,10 +26,16 @@ const PeopleContent: React.FC<IPeopleContent> = (props) => {
         <FormControl fullWidth sx={{ margin: 1, maxWidth: 200 }}>
           <InputLabel>Variable</InputLabel>
           <Select
-            value={`${props.socioVarIdx}`}
-            label={props.socioVariables[props.socioVarIdx].name}
-            onChange={(event: SelectChangeEvent) => props.updateSocioLayer(parseInt(event.target.value), null)}
+            value={props.socioVarIdx === null ? "" : `${props.socioVarIdx}`}
+            label={props.socioVarIdx === null ? "" : props.socioVariables[props.socioVarIdx].name}
+            onChange={(event: SelectChangeEvent) => {
+              const value = event.target.value ? parseInt(event.target.value) : event.target.value
+              props.updateSocioLayer(value, null)
+            }}
           >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
             {
               props.socioVariables.map((obj: {name: string, id: string}, idx: number) => <MenuItem key={`sources_key_${obj.id}`} value={idx}>{obj.name}</MenuItem>)
             }

@@ -18,7 +18,6 @@ interface IMap {
   zoom: number
   variable: string | null
   year: string
-  spatialLevel: any
   showStations: boolean
   opacity: number
   boundOpacity: number
@@ -43,7 +42,9 @@ const Map: React.FC<IMap> = (props) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const [map, setMap] = useState<mapboxgl.Map | null>(null)
   const [currentZoom, setCurrentZoom] = useState<number>(props.zoom)
-  const [currentBounds, setCurrentBounds] = useState({})
+  // const [currentBounds, setCurrentBounds] = useState({})
+  const [spatialLevel, setSpatialLevel] = useState<string>("pt")
+
 
   const startMap = useCallback(() => {
     if (!mapContainerRef.current) return
@@ -53,17 +54,8 @@ const Map: React.FC<IMap> = (props) => {
       style: props.style,
       center: props.center,
       zoom: props.zoom,
+      minZoom: 6
     })
-
-    // mapInstance.on("load", () => {
-    //   mapInstance.addSource("my-terrain-source", {
-    //     type: "raster-dem",
-    //     url: "mapbox://mapbox.terrain-rgb",
-    //     tileSize: 512,
-    //     maxzoom: 14,
-    //   })
-    //   mapInstance.setTerrain({ source: "my-terrain-source" })
-    // })
 
     mapInstance.on("zoom", () => {
       setCurrentZoom(mapInstance.getZoom())
@@ -72,36 +64,57 @@ const Map: React.FC<IMap> = (props) => {
       // HL {_sw: WL {lng: number, lat: number}, _ne: WL {lng: number, lat: number} }
     })
 
-    // mapInstance.on('load', () => {
-    //   // Slower zoom when using the mouse wheel (default ~1/100)
-    //   mapInstance.scrollZoom.setWheelZoomRate(1 / 500); 
-    //   // Slower zoom when using a trackpad (default ~1)
-    //   mapInstance.scrollZoom.setZoomRate(0.2);         
-    // });
-
     setMap(mapInstance)
 
     return () => mapInstance.remove()
   }, [])
 
-  useEffect(() => startMap(), [startMap])
+  const updateSpatialLevel = useCallback(() => {
+    // if (!props.variable && !props.year && ! spatialLevel === null) return
+    // if (!props.variable && !props.year && !props.socioVariable) return
 
-  // useMapClick({
-  //   map,
-  //   clickedLocal: props.clickedLocal,
-  //   variable: props.variable,
-  //   spatialLevel: props.spatialLevel,
-  //   setClickedLocal: props.setClickedLocal,
-  //   updateRiskData: props.updateRiskData
-  // })
+    ;(async () => {
+      try {
+
+        let newSpatialLevel = "bg"
+
+        if (currentZoom < 6.6) {
+          newSpatialLevel = "pt"
+        
+        } else if (currentZoom < 7.8){
+          newSpatialLevel = "co"
+        
+        } else if(currentZoom < 10) {
+
+          newSpatialLevel = "ct"
+        
+        } else if(currentZoom < 12) {
+          newSpatialLevel = "bg"
+        }
+
+        if(newSpatialLevel !== spatialLevel) {
+          setSpatialLevel(newSpatialLevel)
+          
+        }
+
+      } catch (error) {
+        console.error("Error fetching polygon data:", error)
+      }
+    })()
+
+
+  },[currentZoom, spatialLevel])
+
+  useEffect(() => startMap(), [startMap])
+  useEffect(() => updateSpatialLevel(), [updateSpatialLevel])
 
   const deckLayers = useLayers({
     activeStations: props.activeStations,
     variable: props.variable,
     year: props.year,
-    spatialLevel: props.spatialLevel,
+    spatialLevel: spatialLevel,
     activeSection: props.activeSection,
-    setSpatialLevel: props.setSpatialLevel,
+    setSpatialLevel: setSpatialLevel,
     socioVariable: props.socioVariable,
     zoom: currentZoom,
     showStations: props.showStations,

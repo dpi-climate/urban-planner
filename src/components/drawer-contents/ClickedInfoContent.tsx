@@ -25,7 +25,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableRow from '@mui/material/TableRow'
 
 const title = ""//"Local Info"
-const subtitle = ""
+const subtitle = "o"
 
 const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
 
@@ -131,7 +131,6 @@ const ClickedInfoContent: React.FC<InfoContentProps> = (props) => {
       </>
     );
   };
-
   return (
     <Box sx={{ padding: 0.5 }}>
       <Typography variant="h6">{title}</Typography>

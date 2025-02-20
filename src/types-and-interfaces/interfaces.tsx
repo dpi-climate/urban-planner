@@ -3,12 +3,11 @@ import { Anchor, RiskDataType } from "./types"
 
 export interface DrawerWrapperProps {
   anchor: Anchor
-  clickedLocal?: {lat:number, lng: number, elevation: number | null} | null
-  // setClickedLocal?: Dispatch<SetStateAction<{ lat: number; lng: number; elevation: number | null; } | null>>
-  setClickedLocal: React.Dispatch<SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>>;
   buttons?: string[]
-  setBtn?: React.Dispatch<SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>>;//Dispatch<SetStateAction<string | null>>
+  setBtn?: React.Dispatch<SetStateAction<string | null>>;//Dispatch<SetStateAction<string | null>>
   children?: React.ReactNode
+  clickedLocal?: string | null
+  setClickedLocal?: React.Dispatch<SetStateAction<string | null>>
 }
 
 export interface DrawerWrapperContentProps {
@@ -19,10 +18,6 @@ export interface DrawerWrapperContentProps {
   variables: {name: string, id: string}[]
   spatialAggIdx: number
   spatialAggList: {name: string, id: string}[]
-  boundariesList: {name: string, id: string}[]
-  boundaryIdx: number
-  setBoundOpacity: React.Dispatch<SetStateAction<number>>
-  setBoundaryIdx: React.Dispatch<SetStateAction<number>>
 }
 
 export interface InfoContentProps {

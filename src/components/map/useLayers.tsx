@@ -17,7 +17,6 @@ interface IUseLayersParams {
   boundaryId: string
   activeSection: string,
   socioVariable: string,
-  allowedTypes: string[],
   updateRiskData: (lat: number, lon: number, name: string) => void
   setSpatialLevel: React.Dispatch<
   React.SetStateAction<string>>
@@ -65,7 +64,8 @@ interface IStationFeature {
     geometry: {
       type: 'Point',
       coordinates: [number, number]
-    }[]
+    }[],
+    properties: any
   }[]
   type: "FeatureCollection"
 }
@@ -92,7 +92,23 @@ export default function useLayers({
   const [boundaryData, setBoundaryData] = useState<IBoundaryData | null>(null)
 
   const updateClimateLayers = useCallback(() => {
-    if (activeSection !== "climate" || !variable || !year || spatialLevel === null) return
+
+    // if (!variable) {
+    //   setPointData(null)
+    //   setPolygonData(null)
+
+    //   return
+    
+    // } else if (activeSection !== "climate" || !year || spatialLevel === null) return
+
+    if (activeSection !== "climate" || !year || spatialLevel === null) {
+      return 
+      
+    } else if (!variable) {
+      setPointData(null)
+      setPolygonData(null)
+      return 
+    }
 
     let isMounted = true
     ;(async () => {
@@ -127,49 +143,24 @@ export default function useLayers({
     }
   },[variable, year, spatialLevel, setPointData, setPolygonData])
   
-  const updateClimateLayersZoom = useCallback(() => {
-    if (!variable || !year || spatialLevel === null) return
+  const updateSocioLayers = useCallback(() => {    
+    if (activeSection !== "socio" ||  spatialLevel === null) {
+      return
+      
+    } else if (!socioVariable) {
+      setPointData(null)
+      setPolygonData(null)
 
-    ;(async () => {
-      try {
-
-        let newSpatialLevel = "bg"
-
-        if (zoom < 6.6) {
-          newSpatialLevel = "pt"
-        
-        } else if (zoom < 7.8){
-          newSpatialLevel = "co"
-        
-        } else if(zoom < 10) {
-
-          newSpatialLevel = "ct"
-        
-        } else if(zoom < 12) {
-          newSpatialLevel = "bg"
-        }
-
-        if(newSpatialLevel !== spatialLevel) {
-          setSpatialLevel(newSpatialLevel)
-          
-        }
-
-      } catch (error) {
-        console.error("Error fetching polygon data:", error)
-      }
-    })()
-
-  },[variable, year, spatialLevel, zoom, setPointData, setPolygonData])
-
-  const updateSocioLayers = useCallback(() => {
-    if (activeSection !== "socio" ||  !socioVariable || spatialLevel === null) return
-
+      return
+    
+    }
+      
     let isMounted = true
+
     ;(async () => {
       try {
 
         const data = await DataLoader.getSocioLayer(socioVariable, spatialLevel)
-
         if (!isMounted || data === null) return
 
           setPointData(null)
@@ -231,7 +222,6 @@ export default function useLayers({
 
   },[boundaryId])
 
-  useEffect(() => updateClimateLayersZoom(), [updateClimateLayersZoom])
   useEffect(() => updateClimateLayers(), [updateClimateLayers])
   useEffect(() => updateSocioLayers(), [updateSocioLayers])
 
@@ -379,6 +369,7 @@ export default function useLayers({
       // sizeScale: 14,
       pickable: true,
       onClick: (info) => {
+        console.log("click")
         // console.log(info.object.geometry.coordinates)
         const name = info.object.properties["Station Name"]
         const lon = info.object.geometry.coordinates[0]

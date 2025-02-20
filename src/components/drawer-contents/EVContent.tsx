@@ -28,7 +28,6 @@ const EVContent: React.FC<IEVContent> = (props) => {
 
     props.setStations(newStations)
   }
-  console.log(props.activeStations)
   return (
     <>
       <Box sx={{ padding: 2 }}>

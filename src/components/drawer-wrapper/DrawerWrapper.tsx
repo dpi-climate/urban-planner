@@ -90,6 +90,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
   const toggleDrawer = (open: boolean, label?: string) => (event: React.MouseEvent | React.KeyboardEvent) => {
     // Only allow closing via the close button
     if (open) {
+
       setIsOpen(true)
       if (label && props.setBtn) props.setBtn(label)
     } else {
@@ -167,21 +168,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       return null
     }
   }
-
-  // useEffect(() => {
-  //   if (props.clickedLocal) {
-  //     setIsOpen(true)
-  //     if (props.setBtn) props.setBtn(props.clickedLocal)
-  //   } else {
-  //     setIsOpen(false)
-  //     if (props.setClickedLocal) {
-  //       // props.setClickedLocal(null)
-  //       props.setClickedLocal(
-  //   props.clickedLocal ? JSON.stringify(props.clickedLocal) : null
-  // );
-  //     }
-  //   }
-  // }, [props.clickedLocal, props.setClickedLocal, props.setBtn])
+  // console.log(isOpen, props.keys)
 
   useEffect(() => {
     if (props.clickedLocal) {
@@ -192,7 +179,6 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       if (props.setClickedLocal) props.setClickedLocal(null);
     }
   }, [props.clickedLocal, props.setClickedLocal, props.setBtn]);
-  
 
   return (
     <div style={{ position: 'relative' }}>
@@ -201,6 +187,7 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
 
       {/* Persistent Drawer */}
       <Drawer
+      // key={props.key}
         anchor={props.anchor}
         open={isOpen}
         variant="persistent"
