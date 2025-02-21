@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ElementWrapper from '../element-wrapper/ElementWrapper'
 import Map from './Map'
 import ColorBarWrapper from './ColorBarWrapper'
@@ -6,6 +6,7 @@ import ColorBar from './ColorBar'
 import MySlider from './MySlider'
 import { Row } from 'react-bootstrap'
 import { StationType } from '../../types-and-interfaces/types'
+import { colors } from "../../utils/colors"
 
 interface MapWrapperProps {
   climateVarsList: { name: string; id: string; colors: number[]; domain: number[] }[]
@@ -57,9 +58,23 @@ const MapWrapper: React.FC<MapWrapperProps> = ({
 
   const [opacity, setOpacity] = useState<number>(0.8)
   const [boundOpacity, setBoundOpacity] = useState<number>(0.5)
+  const [domain, setDomain] = useState<[number, number] | null>(null)
 
   const renderMap = () => {
-    return (
+    const arr = activeSection === 'climate' ? climateVarsList : socioVarsList
+    const idx = variableIdx !== null
+      ? variableIdx
+      : socioVarIdx !== null
+        ? socioVarIdx
+        : null
+
+        const colorScheme = idx === null || !arr?.[idx]
+          ? null
+          : activeSection === 'climate' 
+              ? colors[climateVarsItems[variableIdx].id]
+              : colors[socioVarsItems[socioVarIdx].id]
+    
+      return (
       <ElementWrapper height="100%">
         <Map
           style="mapbox://styles/mapbox/standard-satellite"
@@ -75,6 +90,8 @@ const MapWrapper: React.FC<MapWrapperProps> = ({
           opacity={opacity}
           boundOpacity={boundOpacity}
           boundaryId={boundariesList?.[boundaryIdx]?.id || 'None'}
+          colorScheme={colorScheme}
+          setDomain={setDomain}
           setSocioInfo={setSocioInfo}
           setClickedLocal={setClickedLocal}
           updateRiskData={updateRiskData}
@@ -94,15 +111,22 @@ const MapWrapper: React.FC<MapWrapperProps> = ({
 
       if(idx === null || !arr?.[idx]) return null
 
+      
+      const colorScheme = idx === null || !arr?.[idx]
+          ? null
+          : activeSection === 'climate' 
+              ? colors[climateVarsItems[variableIdx].id]
+              : colors[socioVarsItems[socioVarIdx].id]
+  
 
     return (
       <ColorBarWrapper display="block" controlDrag={controlDrag}>
         {/* <Row key={`row-map-legend-${arr[variableIdx].id}-${climateTstampsList[yearIdx]}`} style={{ marginTop: '5px' }}> */}
         <Row key={`row-map-legend-${arr[idx].id}-`} style={{ marginTop: '5px' }}>
           <ColorBar
-            colorScheme={arr[idx].colors}
+            colorScheme={colorScheme}
             legId={arr[idx].id}
-            domain={arr[idx].domain}
+            domain={domain ? domain : arr[idx].domain}
             label={arr[idx].name}
           />
         </Row>

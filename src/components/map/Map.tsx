@@ -21,6 +21,7 @@ interface IMap {
   showStations: boolean
   opacity: number
   boundOpacity: number
+  colorScheme: any
   setClickedLocal: React.Dispatch<
     React.SetStateAction<{ lat: number; lng: number; elevation: number | null } | null>
   >
@@ -30,6 +31,7 @@ interface IMap {
   socioVariable: string
   activeSection: "climate" | "socio"
   activeStations: StationType[]
+  setDomain: React.Dispatch<React.SetStateAction<[number, number] | null>>
   updateSocioLayer: (varIdx: number | null, sIdx: number | null) => void
   updateRiskData: (ptIdx: number | [number, number], elevation: number | null) => void
   setSocioInfo: React.Dispatch<
@@ -109,6 +111,7 @@ const Map: React.FC<IMap> = (props) => {
   useEffect(() => updateSpatialLevel(), [updateSpatialLevel])
 
   const deckLayers = useLayers({
+    setDomain: props.setDomain,
     activeStations: props.activeStations,
     variable: props.variable,
     year: props.year,

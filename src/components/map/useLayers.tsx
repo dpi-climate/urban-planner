@@ -4,6 +4,10 @@ import { Layer } from "@deck.gl/core"
 import { DataLoader } from "../../data-loader/DataLoader"
 // import wellknown from "wellknown";
 import { StationType } from "../../types-and-interfaces/types";
+import { interpolateTurbo } from 'd3-scale-chromatic';
+import { scaleSequential, scaleQuantize } from 'd3-scale';
+import { colors } from "../../utils/colors"
+
 
 interface IUseLayersParams {
   activeStations: StationType[]
@@ -17,6 +21,7 @@ interface IUseLayersParams {
   boundaryId: string
   activeSection: string,
   socioVariable: string,
+  setDomain: React.Dispatch<React.SetStateAction<[number, number] | null>>
   updateRiskData: (lat: number, lon: number, name: string) => void
   setSpatialLevel: React.Dispatch<
   React.SetStateAction<string>>
@@ -40,7 +45,9 @@ interface IPolygonData {
     value: number
     color: [number, number, number, number]
     geometry: GeoJSON.Geometry
-  }>
+  }>,
+  minVal: number,
+  maxVal: number
 }
 
 interface IBoundaryData {
@@ -84,22 +91,17 @@ export default function useLayers({
   setSocioInfo,
   setSpatialLevel,
   socioVariable,
+  setDomain,
   updateRiskData
 }: IUseLayersParams): Layer[] {
+
+  const [colorScheme, setColorScheme] = useState<[number, number, number][] | null>([])
   const [pointData, setPointData] = useState<IPointData | null>(null)
   const [polygonData, setPolygonData] = useState<IPolygonData | null>(null)
   const [stations, setStations] = useState<IStationFeature | null>(null)
   const [boundaryData, setBoundaryData] = useState<IBoundaryData | null>(null)
 
   const updateClimateLayers = useCallback(() => {
-
-    // if (!variable) {
-    //   setPointData(null)
-    //   setPolygonData(null)
-
-    //   return
-    
-    // } else if (activeSection !== "climate" || !year || spatialLevel === null) return
 
     if (activeSection !== "climate" || !year || spatialLevel === null) {
       return 
@@ -119,15 +121,20 @@ export default function useLayers({
         const data = await DataLoader.getPointLayerData(variable, year, spatialLevel, null)
 
         if (!isMounted || data === null) return
-
+        
+        setColorScheme(colors[variable])
+        
         if (spatialLevel === "pt") {
+
+          setDomain([data.minVal, data.maxVal])
           setPolygonData(null)
           setPointData(data as unknown as IPointData)
-
-        // } else if (spatialLevel === "ct" || spatialLevel === "bg") {
-        } else {
-          setPointData(null)
-          setPolygonData(data as IPolygonData)
+          
+          } else {
+            setPointData(null)
+          
+            setDomain([data.minVal, data.maxVal])
+            setPolygonData(data as IPolygonData)
         }
       } catch (error) {
         console.error("Error fetching polygon data:", error)
@@ -142,12 +149,15 @@ export default function useLayers({
       isMounted = false
     }
   },[variable, year, spatialLevel, setPointData, setPolygonData])
+// },[variable, year, setPointData, setPolygonData])
   
   const updateSocioLayers = useCallback(() => {    
     if (activeSection !== "socio" ||  spatialLevel === null) {
       return
       
     } else if (!socioVariable) {
+      setColorScheme(null)
+      setDomain(null)
       setPointData(null)
       setPolygonData(null)
 
@@ -163,6 +173,8 @@ export default function useLayers({
         const data = await DataLoader.getSocioLayer(socioVariable, spatialLevel)
         if (!isMounted || data === null) return
 
+          setColorScheme(colors[socioVariable])
+          setDomain([data.minVal, data.maxVal])
           setPointData(null)
           setPolygonData(data as IPolygonData)
 
@@ -233,37 +245,47 @@ export default function useLayers({
     else if (zoom <= 17) return 0.05
     else if (zoom <= 20) return 0.01
     return 0.01
-  }, [zoom])
+  }, [])
 
   const pointLayer = useMemo(() => {
     if (!pointData) return null
-    
+
+    const domain = [pointData.minVal, pointData.maxVal] 
+
+    const colorScale = scaleQuantize()
+      .domain(domain)
+      .range(colorScheme)
+     
     return new ScatterplotLayer({
       id: `scatterplot-layer-${variable}-${year}`,
       data: {
         length: pointData.length,
         attributes: {
           getPosition: { value: new Float32Array(pointData.positions), size: 2 },
-          getFillColor: { value: new Uint8Array(pointData.colors), size: 4 },
         },
         // ids: pointData.ids,
         values: pointData.values,
       },
       getPosition: (d) => d.getPosition,
-      getFillColor: (d) => d.getFillColor,
+      getFillColor: (_, {index}) => {
+        const value = pointData.values[index]
+        if (value === null || isNaN(value)) return [255, 255, 255, 0];
+        return colorScale(value).concat(Math.floor(255 * opacity));
+      },//d.getFillColor,
       getRadius: 500,
       radiusScale: radiusScale,
       radiusMinPixels: 1,
       radiusMaxPixels: 500,
       opacity: opacity,
       pickable: false,
-      // onClick: (info) => {
-      //   const index = info.index;
-      //   const value = pointData.values[index];
-      //   const cl = pointData.colors[index];
-      //   console.log(`Value: ${value !== null ? value : 'N/A'}, ${cl}`);
-      // }
+      onClick: (info) => {
+        const index = info.index;
+        const value = pointData.values[index];
+        const cl = pointData.colors[index];
+        console.log(`Value: ${value !== null ? value : 'N/A'}, ${cl}`);
+      }
     })
+
   }, [pointData, radiusScale, variable, year, opacity])
 
   const polygonLayerGjson = useMemo(() => {
@@ -306,15 +328,24 @@ export default function useLayers({
         })),
       }
     }
+    
+    const data = toGeoJSON(polygonData)
+    const domain = [polygonData.minVal, polygonData.maxVal] //domain: [tractData.minVal, tractData.maxVal]
+  
 
+    const colorScale = scaleQuantize()
+      .domain(domain)
+      .range(colorScheme)
+      
     return new GeoJsonLayer({
       id: `geojson-layer-${variable}-${year}`,
-      data: toGeoJSON(polygonData),
+      data: data,
       filled: true,
       stroked: true,
       getFillColor: (f) => {
-        const [r, g, b, a] = f.properties.color
-        return [r, g, b, Math.floor(a * opacity)]
+        const value = f.properties.value;
+        if (value === null || isNaN(value)) return [255, 255, 255, Math.floor(255 * opacity)]; // Default for null or undefined
+        return colorScale(value).concat(Math.floor(255 * opacity)); // Add alpha value
       },
       getLineColor: () => [0, 0, 0, Math.floor(150 * boundOpacity)],
       lineWidthMinPixels: 1,

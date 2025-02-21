@@ -98,7 +98,6 @@ const DrawerWrapper: React.FC<DrawerWrapperProps> = (props) => {
       setIsOpen(false)
       if(props.setRiskData) props.setRiskData([])
       }
-      console.log(props.setRiskData)
   }
 
   const handleButtonClick = (label: string, event: React.MouseEvent | React.KeyboardEvent) => {

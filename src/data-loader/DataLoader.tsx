@@ -1,7 +1,4 @@
 import axios from "axios"
-// import { serverUrl } from "../consts/consts"
-// import { tableFromIPC, Table } from 'apache-arrow'
-// import parseWkt from 'wellknown';
 
 const serverUrl = process.env.REACT_APP_SERVER_URL as string
 
@@ -128,6 +125,12 @@ export abstract class DataLoader {
             values.push(null); // Default to null on unexpected flag
           }
         }
+
+        const minVal = dataView.getFloat32(offset, true);
+        offset += 4;
+
+        const maxVal = dataView.getFloat32(offset, true);
+        offset += 4;
       
         // Return an object with typed arrays
         return {
@@ -136,6 +139,8 @@ export abstract class DataLoader {
           colors,
           ids: idsArray,
           values,
+          minVal,
+          maxVal
         }
       // } else if(sLevel === "ct" || sLevel === "bg") {
       } else {
@@ -207,8 +212,13 @@ export abstract class DataLoader {
       
         let offset = 0;
       
-        // 1) number of features
         const numFeatures = dataView.getUint32(offset, true);
+        offset += 4;
+
+        const minVal = dataView.getFloat32(offset, true);
+        offset += 4;
+
+        const maxVal = dataView.getFloat32(offset, true);
         offset += 4;
       
         const features = [];
@@ -255,7 +265,7 @@ export abstract class DataLoader {
         }
       
         // Return an object that mimics your original { tracts: [...] } structure
-        return { features };
+        return { features, minVal, maxVal };
       }
     }
 
@@ -289,6 +299,7 @@ export abstract class DataLoader {
       // 1) number of features
       const numFeatures = dataView.getUint32(offset, true);
       offset += 4;
+      
     
       const features = [];
     
@@ -332,8 +343,11 @@ export abstract class DataLoader {
           geometry: geometry,
         });
       }
+
+      const minVal = 0
+      const maxVal = 1
     
-      return { features }
+      return { features, minVal, maxVal }
 
 
   }

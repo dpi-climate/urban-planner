@@ -29,7 +29,7 @@ const Home = () => {
   const [climateTstampsList, setClimateTstampsList] = useState<number[]>([])
 
   const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
-  const [variableIdx, setVariableIdx]   = useState<number | null>(null)
+  const [variableIdx, setVariableIdx]   = useState<number | null>(initialIdx)
   const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(0)  
 
   // Risk
