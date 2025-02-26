@@ -227,7 +227,7 @@ const Home = () => {
   const renderHeader = () => {
     return (
       <div className="my-header">
-        <div className="header-text">Flood Risks on Charging Infrastructure for the State of Illinois</div>
+        <div className="header-text">Flood Risks on Fuel Stations for the State of Illinois</div>
         <div className="logo-container">
           <img className="climate-logo" src="/new-climate-logo-background.png" alt="climate-logo"/>
           <img className="cleets-logo" src="/cleets logo-01.png" alt="cleets-logo" />
