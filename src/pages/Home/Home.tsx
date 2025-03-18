@@ -19,7 +19,6 @@ const Home = () => {
   // ////////////////   CLIMATE CONTENT   ////////////////////////////////////////////
   
   // Climate
-  const initialIdx = 2
 
   // const stationTypes = ["electric", "biodiesel", "ethanol", "cng", "lng"]
   
@@ -28,8 +27,8 @@ const Home = () => {
   const [climateSpLvlList, setClimateSpLvlList] = useState<{ name: string, id: string }[]>([])
   const [climateTstampsList, setClimateTstampsList] = useState<number[]>([])
 
-  const [yearIdx, setYearIdx]           = useState<number>(initialIdx)
-  const [variableIdx, setVariableIdx]   = useState<number | null>(initialIdx)
+  const [yearIdx, setYearIdx]           = useState<number>(0)
+  const [variableIdx, setVariableIdx]   = useState<number | null>(0)
   const [spatialAggIdx, setSpatialAggIdx]   = useState<number>(0)  
 
   // Risk
@@ -137,7 +136,7 @@ const Home = () => {
       
       setClimateVarsList(vList)
       setClimateVarsItems(vItems)
-
+      
       // Climate Spatial Levels
       const spLvlList = await DataLoader.getClimateSpatialLevelList()
       // const spIds = spLvlList.map((d: { id: string, name: string}) => d.id)
@@ -147,6 +146,7 @@ const Home = () => {
       // Climate Time Stamps
       const climateTsmps = await DataLoader.getClimateTimeStampsList()
       setClimateTstampsList(climateTsmps)
+      setYearIdx(climateTsmps.length -1)
 
       // Socio
       const socioVars = await DataLoader.getSocioVariablesList()
